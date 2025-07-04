@@ -1,0 +1,6 @@
+[submodule "docs/world-id-docs"]
+	path = docs/world-id-docs
+	url = git@github.com:worldcoin/world-id-docs.git
+[submodule "docs/walrus"]
+	path = docs/walrus
+	url = git@github.com:MystenLabs/walrus.git
