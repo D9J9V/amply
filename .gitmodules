@@ -4,3 +4,6 @@
 [submodule "docs/walrus"]
 	path = docs/walrus
 	url = git@github.com:MystenLabs/walrus.git
+[submodule "docs/ledger-live-wiki"]
+	path = docs/ledger-live-wiki
+	url = https://github.com/LedgerHQ/ledger-live.wiki.git

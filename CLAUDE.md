@@ -134,3 +134,4 @@ When implementing features, consult these documentation resources:
 
 - **Verifications**: When implementing features related to identity verifications, user authentication, or proof systems, be sure to read `/docs/world-id-docs`
 - **Storage**: When implementing features related to decentralized storage, file handling, or data persistence, be sure to read `/docs/walrus`
+- **Hardware Wallet Integration**: When implementing features related to Ledger hardware wallet integration, NFT custody, or secure transaction signing, be sure to read `/docs/ledger-live-wiki`

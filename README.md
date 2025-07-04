@@ -80,6 +80,7 @@ pnpm start
 - **Blockchain**: World chain network
 - **Identity**: World ID SDK
 - **Storage**: Walrus decentralized storage
+- **Hardware Wallet**: Ledger integration for secure NFT custody
 - **Deployment**: Vercel
 
 ## Contributing
