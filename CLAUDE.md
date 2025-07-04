@@ -2,6 +2,26 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Project Overview
+
+**⚡ Amply**: Your content, your rules. Real impressions, full ownership. The future of music is human.
+
+Amply is a decentralized digital content platform for the Audio/Video category that empowers creators with true ownership and authentic engagement metrics. The platform ensures every interaction comes from verified humans, eliminating bot fraud and creating genuine connections between artists and audiences.
+
+### Core Features
+- **Human-Verified Impressions**: All interactions are verified through World ID using Zero-Knowledge Proofs
+- **True Creator Ownership**: Artists maintain full control via NFTs secured with Ledger hardware wallets
+- **Decentralized Storage**: Content permanently stored on Walrus network, censorship-resistant
+- **Fair Monetization**: Direct tipping and support from real fans to creators
+
+### Technical Integration Points
+- **World Chain Network**: Smart contracts for NFT ownership and verified interactions
+- **World ID SDK**: Human verification system for all platform interactions
+- **Walrus Storage**: Decentralized content storage for audio/video files
+- **Ledger Integration**: Hardware wallet support for secure NFT custody
+
+**Demo**: https://amply-seven.vercel.app/
+
 ## Commands
 
 ### Development
