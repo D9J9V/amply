@@ -33,7 +33,7 @@ Amply is a robust and decentralized Web3 application designed to create a fair a
 
 * **Master Ownership (NFTs & Ledger)**: Master NFTs are custom **ERC-721 contracts** deployed on Worldchain. These NFTs contain metadata that links to the original content. Amply demonstrates how artists can connect their **Ledger hardware wallets** via WalletConnect (or similar) to securely self-custody these master NFTs, emphasizing true artist control over their work.
 
-* **Decentralized Content Storage (Walrus.xyz)**: All audio and video files, along with associated content, are uploaded and stored using **Walrus.xyz**. This platform provides a robust, decentralized storage solution, ensuring content is permanent, always available, and censorship-resistant, without relying on central servers. The Content ID (CID) of each file from Walrus.xyz is obtained and stored within the NFT's metadata on the blockchain, ensuring content immutability and accessibility from a distributed network.
+* **Decentralized Content Storage (Walrus.xyz)**: All audio and video files, along with associated content, are uploaded and stored using **Walrus.xyz**. This platform provides a robust, decentralized storage solution, ensuring content is permanent, always available, and censorship-resistant, without relying on central servers. The Content ID (CID) of each file from Walrus.xyz is obtained and stored within the NFT's metadata on the blockchain, ensuring content immutability and accessibility from a distributed network. See `/docs/WALRUS_IMPLEMENTATION_GUIDE.md` for specific API integration examples.
 
 ## Getting Started
 
@@ -82,6 +82,85 @@ pnpm start
 - **Storage**: Walrus decentralized storage
 - **Hardware Wallet**: Ledger integration for secure NFT custody
 - **Deployment**: Vercel
+
+## Application Routes
+
+### Route Structure Diagram
+
+```
+/
+├── Home (Music discovery hub)
+│   ├── New Music Section
+│   ├── Playlists Section
+│   └── Trends Section
+│
+├── /artist/[handle]
+│   ├── Artist Profile (Default view)
+│   └── (Nested layouts with persistent menu)
+│       ├── /dashboard     → Analytics & insights
+│       ├── /masters       → NFT master recordings
+│       ├── /upload        → Content upload interface
+│       ├── /monetization  → Earnings & tipping
+│       └── /settings      → Profile configuration
+│
+└── /feed/[genres]
+    └── (Genre-based music feeds)
+        ├── /feed/rock
+        ├── /feed/indie
+        ├── /feed/pop
+        └── /feed/[dynamic-genre]
+```
+
+### Route Descriptions
+
+#### **`/` - Home Page**
+The main entry point of Amply, designed as a music discovery hub featuring:
+- **New Music**: Showcases recently uploaded tracks with verified human impressions
+- **Playlists**: Curated collections by verified users and artists
+- **Trends**: Real-time trending content based on authentic engagement metrics
+
+#### **`/artist/[handle]` - Artist Profile & Dashboard**
+Dynamic artist pages with a persistent navigation menu across all subroutes:
+
+- **Main Profile**: Public-facing artist page displaying bio, featured tracks, and verified metrics
+- **`/artist/[handle]/dashboard`**: Private analytics dashboard showing:
+  - Real human impression counts
+  - Engagement metrics (tips, shares, playlist adds)
+  - Audience demographics (anonymized via World ID)
+  - Revenue analytics
+
+- **`/artist/[handle]/masters`**: NFT master recordings management:
+  - View all minted master NFTs
+  - Transfer ownership controls
+  - Ledger wallet integration for secure custody
+  - Smart contract interaction history
+
+- **`/artist/[handle]/upload`**: Content upload interface:
+  - Audio/video file upload to Walrus network
+  - Metadata entry (title, description, genre)
+  - Master NFT minting options
+  - Publishing controls
+
+- **`/artist/[handle]/monetization`**: Revenue management:
+  - Tip collection history
+  - Withdrawal options
+  - Fan support analytics
+  - Direct monetization settings
+
+- **`/artist/[handle]/settings`**: Profile configuration:
+  - Artist bio and social links
+  - Verification status (World ID)
+  - Privacy preferences
+  - Notification settings
+
+#### **`/feed/[genres]` - Genre Feeds**
+Dynamic content feeds organized by musical genres:
+- **Dynamic Genre Routes**: `/feed/rock`, `/feed/indie`, `/feed/pop`, etc.
+- **Filtered Content**: Only shows tracks from verified human uploads
+- **Engagement Sorting**: Prioritizes content with authentic interactions
+- **Genre Discovery**: Helps users explore specific musical styles
+
+Each feed maintains a consistent layout while dynamically loading genre-specific content, ensuring authentic discovery experiences free from bot manipulation.
 
 ## Contributing
 
