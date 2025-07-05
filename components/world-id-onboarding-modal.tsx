@@ -68,7 +68,7 @@ export default function WorldIdOnboardingModal({ isOpen, onClose, onConnect, onS
               <div>
                 <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-amply-black mb-2">Verify Your Humanity</h3>
                 <p className="text-gray-600 text-sm sm:text-base leading-relaxed px-2">
-                  Connect with World ID to prove you're human and unlock exclusive features in our community of verified
+                  Connect with World ID to prove you&apos;re human and unlock exclusive features in our community of verified
                   creators and listeners.
                 </p>
               </div>
@@ -76,7 +76,7 @@ export default function WorldIdOnboardingModal({ isOpen, onClose, onConnect, onS
 
             {/* Benefits */}
             <div className="space-y-3 sm:space-y-4">
-              <h4 className="font-semibold text-amply-black text-sm sm:text-base lg:text-lg">What you'll get:</h4>
+              <h4 className="font-semibold text-amply-black text-sm sm:text-base lg:text-lg">What you&apos;ll get:</h4>
               <div className="space-y-2 sm:space-y-3">
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 bg-amply-orange/10 rounded-xl flex items-center justify-center flex-shrink-0">

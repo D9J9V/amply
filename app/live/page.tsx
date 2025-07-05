@@ -82,14 +82,13 @@ export default function LivePage() {
   })
 
   const liveCount = filtered.filter((s) => s.status === "live").length
-  const scheduledCount = filtered.filter((s) => s.status === "scheduled").length
 
   useEffect(() => {
     const t = setTimeout(() => {
       filtered.forEach((_, idx) => setTimeout(() => setCardInView((prev) => [...prev, idx]), idx * 120))
     }, 80)
     return () => clearTimeout(t)
-  }, [selectedCategory, searchQuery])
+  }, [selectedCategory, searchQuery, filtered])
 
   const rarityColor = (status: string) => (status === "live" ? "bg-red-500" : "bg-amply-orange")
 

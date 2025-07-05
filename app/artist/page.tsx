@@ -253,7 +253,7 @@ export default function ArtistPage() {
             <Card className="bg-amply-white border-0 shadow-card rounded-3xl">
               <CardHeader>
                 <CardTitle className="text-amply-black">Performance Analytics</CardTitle>
-                <CardDescription>Track your music's performance and audience engagement</CardDescription>
+                <CardDescription>Track your music&apos;s performance and audience engagement</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-64 bg-gray-50 rounded-2xl flex items-center justify-center">

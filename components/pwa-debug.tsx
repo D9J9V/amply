@@ -8,8 +8,8 @@ import { Smartphone, CheckCircle, XCircle, AlertCircle, Download, EyeOff } from 
 
 export default function PWADebug() {
   const [isVisible, setIsVisible] = useState(false)
-  const [debugInfo, setDebugInfo] = useState<any>({})
-  const [manifestData, setManifestData] = useState<any>(null)
+  const [debugInfo, setDebugInfo] = useState<Record<string, unknown>>({})
+  const [manifestData, setManifestData] = useState<Record<string, unknown> | null>(null)
   const [swStatus, setSWStatus] = useState<string>("unknown")
 
   useEffect(() => {
@@ -51,7 +51,7 @@ export default function PWADebug() {
 
     // Listen for PWA events
     const handleBeforeInstallPrompt = () => {
-      setDebugInfo((prev: any) => ({ ...prev, hasBeforeInstallPrompt: true }))
+      setDebugInfo((prev) => ({ ...prev, hasBeforeInstallPrompt: true }))
     }
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt)

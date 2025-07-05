@@ -423,7 +423,7 @@ export default function HomePage() {
           paddingTop: "140px", // Increased for mobile header
         }}
       >
-        {feedItems.map((item, index) => {
+        {feedItems.map((item) => {
           const TypeIcon = getTypeIcon(item.type)
           const isPlaying = currentPlaying === item.id
           const isLiked = likedItems.includes(item.id)

@@ -31,13 +31,13 @@ export default function PWAPrompt() {
     // Check if running as PWA
     const isStandaloneMode =
       window.matchMedia("(display-mode: standalone)").matches ||
-      (window.navigator as any).standalone === true ||
+      (window.navigator as Navigator & { standalone?: boolean }).standalone === true ||
       document.referrer.includes("android-app://")
 
     setIsStandalone(isStandaloneMode)
 
     // Check if iOS
-    const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream
+    const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as Window & { MSStream?: unknown }).MSStream
     setIsIOS(iOS)
 
     // Debug info
@@ -166,7 +166,7 @@ export default function PWAPrompt() {
                   <div className="flex items-center space-x-2 text-sm text-amply-black/80">
                     <span>2. Selecciona</span>
                     <Plus className="w-4 h-4 text-amply-orange" />
-                    <span>"Añadir a pantalla de inicio"</span>
+                    <span>&quot;Añadir a pantalla de inicio&quot;</span>
                   </div>
                 </div>
               ) : (
