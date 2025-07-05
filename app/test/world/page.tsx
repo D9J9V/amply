@@ -12,6 +12,8 @@ export default function WorldTestPage() {
   const [tipStatus, setTipStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [tipResult, setTipResult] = useState<{ status: string } | null>(null);
   const [shareStatus, setShareStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [artistVerificationStatus, setArtistVerificationStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [artistVerificationResult, setArtistVerificationResult] = useState<MiniAppVerifyActionPayload | null>(null);
   const [error, setError] = useState<string>('');
 
   // Test data
@@ -30,8 +32,9 @@ export default function WorldTestPage() {
       setVerificationStatus('loading');
       setError('');
       
+      // Using your registered action for content access (unlimited verifications)
       const verifyPayload: VerifyCommandInput = {
-        action: 'access-content',
+        action: 'verify_content_access', // Your registered action ID
         signal: contentId,
         verification_level: VerificationLevel.Orb,
       };
@@ -166,6 +169,32 @@ export default function WorldTestPage() {
     }
   };
 
+  // 5. Artist Verification Test (One-time only)
+  const handleArtistVerification = async () => {
+    try {
+      setArtistVerificationStatus('loading');
+      setError('');
+      
+      const artistId = 'artist-' + Date.now(); // Unique artist ID
+      
+      const verifyPayload: VerifyCommandInput = {
+        action: 'verify_artist_humanity', // One-time verification
+        signal: artistId,
+        verification_level: VerificationLevel.Orb,
+      };
+
+      const { finalPayload } = await MiniKit.commandsAsync.verify(verifyPayload);
+      
+      setArtistVerificationResult(finalPayload);
+      setArtistVerificationStatus('success');
+      
+      console.log('Artist verification proof:', finalPayload);
+    } catch (err) {
+      setError((err as Error).message || 'Artist verification failed');
+      setArtistVerificationStatus('error');
+    }
+  };
+
   return (
     <div className="min-h-screen py-8 bg-gray-50 dark:bg-gray-900">
       <div className="max-w-4xl mx-auto px-4">
@@ -202,9 +231,10 @@ export default function WorldTestPage() {
             
             <div className="mb-4">
               <p className="text-xs text-gray-500 dark:text-gray-500">
-                <strong>Action:</strong> access-content<br />
+                <strong>Action:</strong> verify_content_access<br />
                 <strong>Signal:</strong> {contentId}<br />
-                <strong>Level:</strong> Orb
+                <strong>Level:</strong> Orb<br />
+                <span className="text-green-500">✓ Unlimited verifications per user</span>
               </p>
             </div>
 
@@ -324,6 +354,49 @@ export default function WorldTestPage() {
             {shareStatus === 'success' && (
               <div className="mt-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
                 <p className="text-green-700 dark:text-green-400">Track shared successfully!</p>
+              </div>
+            )}
+          </div>
+
+          {/* 5. Artist Verification Test */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+              5. Artist Verification Test
+            </h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              One-time verification for artists to prove humanity before uploading content.
+            </p>
+            
+            <div className="mb-4">
+              <p className="text-xs text-gray-500 dark:text-gray-500">
+                <strong>Action:</strong> verify_artist_humanity<br />
+                <strong>Signal:</strong> Unique artist ID<br />
+                <strong>Level:</strong> Orb<br />
+                <span className="text-yellow-500">⚠️ Can only be verified once per World ID</span>
+              </p>
+            </div>
+
+            <button
+              onClick={handleArtistVerification}
+              disabled={artistVerificationStatus === 'loading'}
+              className="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {artistVerificationStatus === 'loading' ? 'Verifying...' : 'Verify as Artist'}
+            </button>
+
+            {artistVerificationResult && (
+              <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <h3 className="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">Artist Verification Result:</h3>
+                <pre className="text-xs overflow-x-auto text-gray-600 dark:text-gray-400">
+                  {JSON.stringify(artistVerificationResult, null, 2)}
+                </pre>
+                {artistVerificationResult.status === 'success' && (
+                  <div className="mt-2">
+                    <p className="text-xs text-green-600 dark:text-green-400">
+                      <strong>✓ Artist verified!</strong> This World ID can now upload content.
+                    </p>
+                  </div>
+                )}
               </div>
             )}
           </div>
