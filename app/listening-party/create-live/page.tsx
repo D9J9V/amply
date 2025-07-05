@@ -19,7 +19,7 @@ export default function CreateLiveListeningParty() {
 
     try {
       // Get or create user for MVP demo
-      let userId = localStorage.getItem('amply_demo_user_id');
+      const userId = localStorage.getItem('amply_demo_user_id');
       let user;
       
       if (!userId) {

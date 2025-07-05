@@ -90,7 +90,7 @@ export default function LiveListeningParty() {
   useEffect(() => {
     const initUser = async () => {
       // For MVP demo, create or retrieve a user from localStorage/database
-      let userId = localStorage.getItem('amply_demo_user_id');
+      const userId = localStorage.getItem('amply_demo_user_id');
       
       if (!userId) {
         // Create a new user in the database

@@ -34,7 +34,7 @@ export default function TestListeningParty() {
   const testSupabaseConnection = async () => {
     setLoading(prev => ({ ...prev, connection: true }));
     try {
-      const { data, error, count } = await supabase
+      const { error, count } = await supabase
         .from('users')
         .select('*', { count: 'exact', head: true });
       
