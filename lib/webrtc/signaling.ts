@@ -51,6 +51,13 @@ export class WebRTCSignaling {
   }
 
   private async connectToHost() {
+    // Check if we already have a connection
+    const existingPeer = this.peers.get('host');
+    if (existingPeer && !existingPeer.destroyed) {
+      console.log('[WebRTC] Already connected to host');
+      return;
+    }
+
     console.log('[WebRTC] Participant connecting to host...');
     const peer = new SimplePeer({
       initiator: true,
@@ -58,8 +65,14 @@ export class WebRTCSignaling {
       config: {
         iceServers: [
           { urls: 'stun:stun.l.google.com:19302' },
-          { urls: 'stun:stun1.l.google.com:19302' }
-        ]
+          { urls: 'stun:stun1.l.google.com:19302' },
+          { urls: 'stun:stun2.l.google.com:19302' },
+          { urls: 'stun:stun3.l.google.com:19302' },
+          { urls: 'stun:stun4.l.google.com:19302' }
+        ],
+        iceTransportPolicy: 'all',
+        bundlePolicy: 'balanced',
+        rtcpMuxPolicy: 'require'
       }
     });
 
@@ -84,6 +97,21 @@ export class WebRTCSignaling {
 
     peer.on('error', (err) => {
       console.error('[WebRTC] Peer error:', err);
+      // Clean up failed connection
+      if (peer.destroyed) {
+        this.peers.delete('host');
+      }
+    });
+
+    peer.on('close', () => {
+      console.log('[WebRTC] Connection to host closed');
+      this.peers.delete('host');
+      // Attempt to reconnect after a delay
+      setTimeout(() => {
+        if (!this.isHost && this.signalChannel) {
+          this.connectToHost();
+        }
+      }, 3000);
     });
 
     this.peers.set('host', peer);
@@ -115,6 +143,15 @@ export class WebRTCSignaling {
       return;
     }
 
+    // Check if we already have a peer connection for this participant
+    const existingPeer = this.peers.get(data.from);
+    if (existingPeer && !existingPeer.destroyed) {
+      console.log('[WebRTC] Already have connection for participant:', data.from);
+      // Signal the existing peer instead of creating a new one
+      existingPeer.signal(data.signal);
+      return;
+    }
+
     const peer = new SimplePeer({
       initiator: false,
       trickle: true,
@@ -122,8 +159,14 @@ export class WebRTCSignaling {
       config: {
         iceServers: [
           { urls: 'stun:stun.l.google.com:19302' },
-          { urls: 'stun:stun1.l.google.com:19302' }
-        ]
+          { urls: 'stun:stun1.l.google.com:19302' },
+          { urls: 'stun:stun2.l.google.com:19302' },
+          { urls: 'stun:stun3.l.google.com:19302' },
+          { urls: 'stun:stun4.l.google.com:19302' }
+        ],
+        iceTransportPolicy: 'all',
+        bundlePolicy: 'balanced',
+        rtcpMuxPolicy: 'require'
       }
     });
 
@@ -143,6 +186,15 @@ export class WebRTCSignaling {
 
     peer.on('error', (err) => {
       console.error('[WebRTC] Host peer error:', err);
+      // Clean up failed connection
+      if (peer.destroyed) {
+        this.peers.delete(data.from);
+      }
+    });
+
+    peer.on('close', () => {
+      console.log('[WebRTC] Connection to participant closed:', data.from);
+      this.peers.delete(data.from);
     });
 
     peer.signal(data.signal);
