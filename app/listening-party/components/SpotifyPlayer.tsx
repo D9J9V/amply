@@ -51,10 +51,11 @@ export default function SpotifyPlayer({
     script.src = 'https://open.spotify.com/embed/iframe-api/v1';
     script.async = true;
 
-    window.onSpotifyIframeApiReady = (IFrameAPI: IFrameAPI) => {
+    window.onSpotifyIframeApiReady = (IFrameAPI) => {
       const element = playerRef.current;
       if (!element) return;
 
+      const api = IFrameAPI as IFrameAPI;
       const options = {
         uri: `spotify:track:${trackId}`,
         width: '100%',
@@ -80,7 +81,7 @@ export default function SpotifyPlayer({
         });
       };
 
-      IFrameAPI.createController(element, options, callback);
+      api.createController(element, options, callback);
     };
 
     document.body.appendChild(script);
