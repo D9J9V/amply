@@ -147,19 +147,19 @@ export default function PWADebug() {
               <h3 className="font-semibold mb-3">Manifest</h3>
               <div className="bg-gray-50 p-3 rounded text-xs">
                 <p>
-                  <strong>Name:</strong> {manifestData.name}
+                  <strong>Name:</strong> {(manifestData as any).name}
                 </p>
                 <p>
-                  <strong>Short Name:</strong> {manifestData.short_name}
+                  <strong>Short Name:</strong> {(manifestData as any).short_name}
                 </p>
                 <p>
-                  <strong>Start URL:</strong> {manifestData.start_url}
+                  <strong>Start URL:</strong> {(manifestData as any).start_url}
                 </p>
                 <p>
-                  <strong>Display:</strong> {manifestData.display}
+                  <strong>Display:</strong> {(manifestData as any).display}
                 </p>
                 <p>
-                  <strong>Icons:</strong> {manifestData.icons?.length || 0} found
+                  <strong>Icons:</strong> {(manifestData as any).icons?.length || 0} found
                 </p>
               </div>
             </div>
