@@ -71,12 +71,12 @@ export default function SpotifyPlayer({
           console.log('Spotify player ready');
         });
 
-        controller.addListener('playback_update', (e: { data: PlaybackState }) => {
-          setIsPlaying(!e.data.isPaused);
-          setCurrentPosition(e.data.position);
+        controller.addListener('playback_update', (data: PlaybackState) => {
+          setIsPlaying(!data.isPaused);
+          setCurrentPosition(data.position);
           
           if (isHost && onPlaybackChange) {
-            onPlaybackChange(!e.data.isPaused, e.data.position);
+            onPlaybackChange(!data.isPaused, data.position);
           }
         });
       };
