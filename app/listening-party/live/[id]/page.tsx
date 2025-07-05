@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import SimplePeer from "simple-peer";
@@ -50,6 +49,40 @@ export default function LiveListeningParty() {
   const messagesChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const playbackChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const participantsChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+
+  // Load participants
+  const loadParticipants = useCallback(async () => {
+    const { data } = await supabase
+      .from('party_participants')
+      .select('*, user:users!user_id(*)')
+      .eq('party_id', partyId)
+      .is('left_at', null);
+    
+    if (data) setParticipants(data);
+  }, [partyId]);
+
+  // Load messages
+  const loadMessages = useCallback(async () => {
+    const { data } = await supabase
+      .from('party_messages')
+      .select('*, user:users!user_id(*)')
+      .eq('party_id', partyId)
+      .order('created_at', { ascending: true })
+      .limit(50);
+    
+    if (data) setMessages(data);
+  }, [partyId]);
+
+  // Load playback state
+  const loadPlaybackState = useCallback(async () => {
+    const { data } = await supabase
+      .from('party_playback_state')
+      .select('*')
+      .eq('party_id', partyId)
+      .single();
+    
+    if (data) setPlaybackState(data);
+  }, [partyId]);
 
   // Initialize user and verify
   useEffect(() => {
@@ -111,40 +144,6 @@ export default function LiveListeningParty() {
 
     loadPartyData();
   }, [isVerified, currentUser, partyId, router, loadParticipants, loadMessages, loadPlaybackState]);
-
-  // Load participants
-  const loadParticipants = useCallback(async () => {
-    const { data } = await supabase
-      .from('party_participants')
-      .select('*, user:users!user_id(*)')
-      .eq('party_id', partyId)
-      .is('left_at', null);
-    
-    if (data) setParticipants(data);
-  }, [partyId]);
-
-  // Load messages
-  const loadMessages = useCallback(async () => {
-    const { data } = await supabase
-      .from('party_messages')
-      .select('*, user:users!user_id(*)')
-      .eq('party_id', partyId)
-      .order('created_at', { ascending: true })
-      .limit(50);
-    
-    if (data) setMessages(data);
-  }, [partyId]);
-
-  // Load playback state
-  const loadPlaybackState = useCallback(async () => {
-    const { data } = await supabase
-      .from('party_playback_state')
-      .select('*')
-      .eq('party_id', partyId)
-      .single();
-    
-    if (data) setPlaybackState(data);
-  }, [partyId]);
 
   // Set up realtime subscriptions
   useEffect(() => {
@@ -222,7 +221,7 @@ export default function LiveListeningParty() {
         supabase.removeChannel(participantsChannelRef.current);
       }
     };
-  }, [isVerified, currentUser, partyId]);
+  }, [isVerified, currentUser, partyId, loadParticipants]);
 
   // Initialize WebRTC for host
   useEffect(() => {

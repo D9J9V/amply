@@ -47,7 +47,7 @@ export default function TestListeningParty() {
     } catch (error) {
       addTestResult('connection', {
         success: false,
-        message: error.message || 'Connection failed',
+        message: (error instanceof Error ? error.message : String(error)) || 'Connection failed',
         error: error instanceof Error ? error.message : String(error)
       });
     }
@@ -78,7 +78,7 @@ export default function TestListeningParty() {
     } catch (error) {
       addTestResult('createUser', {
         success: false,
-        message: error.message || 'Failed to create user',
+        message: (error instanceof Error ? error.message : String(error)) || 'Failed to create user',
         error: error instanceof Error ? error.message : String(error)
       });
     }
@@ -126,7 +126,7 @@ export default function TestListeningParty() {
     } catch (error) {
       addTestResult('createParty', {
         success: false,
-        message: error.message || 'Failed to create party',
+        message: (error instanceof Error ? error.message : String(error)) || 'Failed to create party',
         error: error instanceof Error ? error.message : String(error)
       });
     }
@@ -164,7 +164,7 @@ export default function TestListeningParty() {
     } catch (error) {
       addTestResult('realtime', {
         success: false,
-        message: error.message || 'Realtime subscription failed',
+        message: (error instanceof Error ? error.message : String(error)) || 'Realtime subscription failed',
         error: error instanceof Error ? error.message : String(error)
       });
       setLoading(prev => ({ ...prev, realtime: false }));
@@ -227,11 +227,11 @@ export default function TestListeningParty() {
                 <p className={testResults.connection.success ? 'text-green-400' : 'text-red-400'}>
                   {testResults.connection.message}
                 </p>
-                {testResults.connection.data && (
+                {testResults.connection.data ? (
                   <pre className="mt-2 text-xs overflow-auto">
                     {JSON.stringify(testResults.connection.data, null, 2)}
                   </pre>
-                )}
+                ) : null}
               </div>
             )}
           </div>
@@ -251,11 +251,11 @@ export default function TestListeningParty() {
                 <p className={testResults.createUser.success ? 'text-green-400' : 'text-red-400'}>
                   {testResults.createUser.message}
                 </p>
-                {testResults.createUser.data && (
+                {testResults.createUser.data ? (
                   <pre className="mt-2 text-xs overflow-auto">
                     {JSON.stringify(testResults.createUser.data, null, 2)}
                   </pre>
-                )}
+                ) : null}
               </div>
             )}
           </div>
@@ -275,21 +275,21 @@ export default function TestListeningParty() {
                 <p className={testResults.createParty.success ? 'text-green-400' : 'text-red-400'}>
                   {testResults.createParty.message}
                 </p>
-                {testResults.createParty.data && (
+                {testResults.createParty.data ? (
                   <div className="mt-2">
                     <pre className="text-xs overflow-auto">
                       {JSON.stringify(testResults.createParty.data, null, 2)}
                     </pre>
-                    {testResults.createParty.data.id && (
+                    {(testResults.createParty.data as { id?: string }).id && (
                       <Link
-                        href={`/listening-party/live/${testResults.createParty.data.id}`}
+                        href={`/listening-party/live/${(testResults.createParty.data as { id: string }).id}`}
                         className="inline-block mt-2 text-purple-400 hover:text-purple-300"
                       >
                         View Created Party →
                       </Link>
                     )}
                   </div>
-                )}
+                ) : null}
               </div>
             )}
           </div>
@@ -309,11 +309,11 @@ export default function TestListeningParty() {
                 <p className={testResults.realtime.success ? 'text-green-400' : 'text-red-400'}>
                   {testResults.realtime.message}
                 </p>
-                {testResults.realtime.payload && (
+                {testResults.realtime.payload ? (
                   <pre className="mt-2 text-xs overflow-auto">
                     {JSON.stringify(testResults.realtime.payload, null, 2)}
                   </pre>
-                )}
+                ) : null}
               </div>
             )}
           </div>
