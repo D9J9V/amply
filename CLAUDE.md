@@ -161,6 +161,8 @@ These test components should:
 When implementing features, consult these documentation resources:
 
 - **Verifications**: When implementing features related to identity verifications, user authentication, or proof systems, be sure to read `/docs/world-id-docs`
+  - **World Mini Apps (MiniKit)**: For client-side actions in World Mini Apps including ID verification, wallet operations, and social features, see `/docs/minikit-js/demo/with-next` for a complete Next.js implementation example
+  - **MiniKit Implementation**: For specific MiniKit integration examples and code snippets for Amply, see `/docs/MINIKIT_IMPLEMENTATION_GUIDE.md`
 - **Storage**: When implementing features related to decentralized storage, file handling, or data persistence, be sure to read `/docs/walrus`
   - **Implementation Guide**: For specific Walrus API integration examples and code snippets, see `/docs/WALRUS_IMPLEMENTATION_GUIDE.md`
 - **Hardware Wallet Integration**: When implementing features related to Ledger hardware wallet integration, NFT custody, or secure transaction signing, be sure to read `/docs/ledger-live-wiki`

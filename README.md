@@ -29,7 +29,7 @@ Amply is a robust and decentralized Web3 application designed to create a fair a
 
 * **Blockchain Core**: The application's core logic, including NFT ownership, tipping transactions, and logging of verified interactions, is implemented with **Smart Contracts on the World chain network**. This network was chosen for its low gas fees and high transaction speed, which are crucial for an application with micro-interactions. While currently on the Testnet for hackathon purposes, it's designed for scalability to the Mainnet.
 
-* **Human Identity Verification (World ID)**: Amply integrates the **World ID SDK** to allow users to privately verify their humanity using Zero-Knowledge Proofs (ZKPs). This is a foundational feature for "quantifying real impressions," ensuring that content access, tips, and other interactions originate from unique, genuine users, effectively preventing bot fraud.
+* **Human Identity Verification (World ID)**: Amply integrates the **World ID SDK** to allow users to privately verify their humanity using Zero-Knowledge Proofs (ZKPs). This is a foundational feature for "quantifying real impressions," ensuring that content access, tips, and other interactions originate from unique, genuine users, effectively preventing bot fraud. The platform is built as a **World Mini App** using MiniKit for seamless integration with World App features. See `/docs/minikit-js/demo/with-next` for implementation examples.
 
 * **Master Ownership (NFTs & Ledger)**: Master NFTs are custom **ERC-721 contracts** deployed on Worldchain. These NFTs contain metadata that links to the original content. Amply demonstrates how artists can connect their **Ledger hardware wallets** via WalletConnect (or similar) to securely self-custody these master NFTs, emphasizing true artist control over their work. All transactions implement **ERC-7730 Clear Signing** for transparent, human-readable transaction approval. See `/docs/ERC7730_CLEAR_SIGNING_GUIDE.md` for implementation details.
 
@@ -78,7 +78,7 @@ pnpm start
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS v4
 - **Blockchain**: World chain network
-- **Identity**: World ID SDK
+- **Identity**: World ID SDK with MiniKit for World Mini App features
 - **Storage**: Walrus decentralized storage
 - **Hardware Wallet**: Ledger integration for secure NFT custody with ERC-7730 Clear Signing
 - **Deployment**: Vercel

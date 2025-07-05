@@ -7,3 +7,6 @@
 [submodule "docs/ledger-live-wiki"]
 	path = docs/ledger-live-wiki
 	url = https://github.com/LedgerHQ/ledger-live.wiki.git
+[submodule "docs/minikit-js"]
+	path = docs/minikit-js
+	url = https://github.com/worldcoin/minikit-js.git
