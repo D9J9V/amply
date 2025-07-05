@@ -128,6 +128,34 @@ Currently no testing framework is configured. When implementing tests, consider:
 - React Testing Library for component testing
 - Playwright or Cypress for E2E testing
 
+### Integration Testing Components
+When implementing new features that integrate with external services (World ID, Ledger, Walrus), ALWAYS create corresponding test components in the `/test` routes:
+
+1. **For World ID features**: Create test components in `/app/test/world/page.tsx` that:
+   - Demonstrate the verification flow
+   - Show authentication states
+   - Test error scenarios
+   - Provide mock verification for development
+
+2. **For Ledger features**: Create test components in `/app/test/ledger/page.tsx` that:
+   - Test wallet connection flows
+   - Demonstrate NFT signing
+   - Show transaction approval UI
+   - Handle disconnection scenarios
+
+3. **For Walrus features**: Create test components in `/app/test/walrus/page.tsx` that:
+   - Test file upload/download
+   - Display blob IDs and metadata
+   - Monitor upload progress
+   - Test error handling
+
+These test components should:
+- Be isolated from production code
+- Include clear UI for testing each feature
+- Show request/response data for debugging
+- Provide mock data options for offline development
+- Display integration status and errors clearly
+
 ## Documentation Resources
 
 When implementing features, consult these documentation resources:

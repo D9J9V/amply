@@ -103,12 +103,18 @@ pnpm start
 │       ├── /monetization  → Earnings & tipping
 │       └── /settings      → Profile configuration
 │
-└── /feed/[genres]
-    └── (Genre-based music feeds)
-        ├── /feed/rock
-        ├── /feed/indie
-        ├── /feed/pop
-        └── /feed/[dynamic-genre]
+├── /feed/[genres]
+│   └── (Genre-based music feeds)
+│       ├── /feed/rock
+│       ├── /feed/indie
+│       ├── /feed/pop
+│       └── /feed/[dynamic-genre]
+│
+└── /test
+    └── (Development testing routes)
+        ├── /test/world      → World ID integration tests
+        ├── /test/ledger     → Ledger wallet integration tests
+        └── /test/walrus     → Walrus storage integration tests
 ```
 
 ### Route Descriptions
@@ -161,6 +167,29 @@ Dynamic content feeds organized by musical genres:
 - **Genre Discovery**: Helps users explore specific musical styles
 
 Each feed maintains a consistent layout while dynamically loading genre-specific content, ensuring authentic discovery experiences free from bot manipulation.
+
+#### **`/test` - Development Testing Routes**
+Isolated testing environments for each major integration:
+
+- **`/test/world`**: World ID integration testing:
+  - Human verification flow testing
+  - Zero-Knowledge Proof generation
+  - Authentication token validation
+  - Mock verification for development
+
+- **`/test/ledger`**: Ledger hardware wallet testing:
+  - WalletConnect integration
+  - NFT signing flows
+  - Transaction approval UI
+  - Hardware wallet detection
+
+- **`/test/walrus`**: Walrus storage testing:
+  - File upload/download flows
+  - Blob ID management
+  - Content retrieval testing
+  - Network performance monitoring
+
+These test routes are isolated from the main application flow and provide dedicated environments for debugging integration issues with clear separation of concerns.
 
 ## Contributing
 
