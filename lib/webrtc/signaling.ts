@@ -190,7 +190,9 @@ export class WebRTCSignaling {
       if (peer.destroyed === false) {
         try {
           // Remove old tracks and add new ones
-          const senders = (peer as any)._pc?.getSenders() || [];
+          // SimplePeer doesn't expose the RTCPeerConnection directly in types
+          const peerWithConnection = peer as SimplePeer.Instance & { _pc?: RTCPeerConnection };
+          const senders = peerWithConnection._pc?.getSenders() || [];
           senders.forEach((sender: RTCRtpSender) => {
             if (sender.track) {
               const newTrack = stream.getTracks().find(t => t.kind === sender.track!.kind);
