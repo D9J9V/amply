@@ -19,6 +19,36 @@ Amply is our answer to that vision. We are more than a decentralized digital con
 
 Amply is the future of digital content value exchange and creation: a digital space where human passion meets technology to forge a virtuous cycle of value, authenticity, and artistic freedom. It's a call to a new standard, where art is truly free and creators are truly sovereign.
 
+## Why Web3
+
+### Instant Global Reach for Emerging Artists
+Building Amply as a World Mini App provides unprecedented advantages for emerging artists in the music ecosystem:
+
+#### 🌍 **23 Million Verified Users**
+- **Instant Exposure**: Launch your music to World App's 23 million verified human users
+- **No Bot Fraud**: Every listener is a real person verified through World ID
+- **Global Audience**: Reach fans across continents without traditional gatekeepers
+
+#### 💰 **Frictionless Monetization**
+- **Integrated Wallets**: Every World App user already has a wallet ready to support artists
+- **Zero Gas Fees**: Free transactions on World Chain (part of the Superchain)
+- **Direct Tips**: Fans can instantly tip artists without payment processors
+- **No Middlemen**: Keep 100% of your fan support
+
+#### 🎵 **True Artist Ownership**
+- **Decentralized Storage**: Your music lives forever on Walrus, uncensorable
+- **NFT Masters**: Own your recordings with Ledger-secured NFTs
+- **Transparent Revenue**: Every transaction is clear with ERC-7730 signing
+- **Your Rules**: Set your own terms without label interference
+
+#### 🚀 **Hackathon Opportunities**
+**$27,000 in prizes** available for building with these technologies:
+- **Mini App Prize**: $17,000 for best World Mini App implementation
+- **Walrus Storage**: $10,000 for innovative storage solutions
+- **Clear Signing**: $4,000 for transparent transactions
+
+This Web3 approach solves real problems for emerging artists: discovery, ownership, and fair compensation. By leveraging World's verified user base, Walrus's permanent storage, and Ledger's secure ownership, Amply creates a music ecosystem where artists truly thrive.
+
 ## How it's Made
 
 Amply is a robust and decentralized Web3 application designed to create a fair and transparent ecosystem for creators and audiences. It achieves this by fusing several cutting-edge technologies:

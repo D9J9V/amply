@@ -22,6 +22,42 @@ Amply is a decentralized digital content platform for the Audio/Video category t
 
 **Demo**: https://amply-seven.vercel.app/
 
+## Why Web3
+
+### Value Propositions for Emerging Artists
+
+When implementing features for Amply, keep in mind these core Web3 advantages that benefit emerging artists:
+
+#### 🌍 **Massive User Base**
+- **23 Million Users**: World App provides instant access to millions of verified humans
+- **Built-in Wallets**: Every user already has payment capabilities
+- **Zero Gas Fees**: Free transactions on World Chain enable micro-tipping
+
+#### 🎵 **Artist Empowerment**
+- **True Ownership**: NFT masters secured by Ledger hardware wallets
+- **Permanent Storage**: Walrus ensures content lives forever, uncensorable
+- **Direct Monetization**: No intermediaries between artists and fans
+
+#### 🔐 **Trust & Transparency**
+- **Verified Humans**: World ID eliminates bot fraud in engagement metrics
+- **Clear Transactions**: ERC-7730 makes every interaction transparent
+- **Immutable Records**: Blockchain ensures transparent revenue tracking
+
+#### 💡 **Technical Advantages**
+- **MiniKit SDK**: Full integration with World App features
+- **Superchain Benefits**: Part of the Optimism ecosystem
+- **Decentralized Infrastructure**: No single point of failure
+
+### Hackathon Prize Alignment
+
+When building features, consider these prize categories totaling $27,000:
+
+1. **Best Mini App ($17,000)**: Requires MiniKit SDK integration
+2. **Walrus Storage ($10,000)**: Innovative decentralized storage use
+3. **Clear Signing ($4,000)**: ERC-7730 transaction transparency
+
+Always prioritize features that leverage these Web3 advantages to solve real problems for emerging artists in the music ecosystem.
+
 ## Commands
 
 ### Development
