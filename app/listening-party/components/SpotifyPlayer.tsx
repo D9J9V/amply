@@ -15,6 +15,7 @@ interface EmbedController {
   seek: (position: number) => void;
   addListener: (event: string, callback: (data: PlaybackState) => void) => void;
   removeListener: (event: string, callback: (data: PlaybackState) => void) => void;
+  destroy?: () => void;
 }
 
 interface PlaybackState {
@@ -88,7 +89,7 @@ export default function SpotifyPlayer({
 
     return () => {
       // Cleanup
-      if (embedController.current) {
+      if (embedController.current && embedController.current.destroy) {
         embedController.current.destroy();
       }
       document.body.removeChild(script);
