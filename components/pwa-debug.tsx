@@ -147,18 +147,23 @@ export default function PWADebug() {
               <h3 className="font-semibold mb-3">Manifest</h3>
               <div className="bg-gray-50 p-3 rounded text-xs">
                 <p>
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                   <strong>Name:</strong> {(manifestData as any).name}
                 </p>
                 <p>
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                   <strong>Short Name:</strong> {(manifestData as any).short_name}
                 </p>
                 <p>
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                   <strong>Start URL:</strong> {(manifestData as any).start_url}
                 </p>
                 <p>
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                   <strong>Display:</strong> {(manifestData as any).display}
                 </p>
                 <p>
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                   <strong>Icons:</strong> {(manifestData as any).icons?.length || 0} found
                 </p>
               </div>
