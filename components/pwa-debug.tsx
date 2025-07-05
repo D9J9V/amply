@@ -129,7 +129,7 @@ export default function PWADebug() {
                   Android: {debugInfo.isAndroid ? "Yes" : "No"}
                 </Badge>
               </div>
-              <p className="text-xs text-gray-600 break-all">User Agent: {debugInfo.userAgent}</p>
+              <p className="text-xs text-gray-600 break-all">User Agent: {debugInfo.userAgent as string}</p>
             </div>
           </div>
 
