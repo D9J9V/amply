@@ -26,6 +26,19 @@ interface UploadState {
   currentPhase: 'idle' | 'draft' | 'permanent' | 'metadata' | 'complete';
 }
 
+interface PrivateVaultDemo {
+  correctAccess: {
+    status: 'idle' | 'loading' | 'success' | 'error';
+    data?: string;
+    error?: string;
+  };
+  incorrectAccess: {
+    status: 'idle' | 'loading' | 'success' | 'error';
+    data?: string;
+    error?: string;
+  };
+}
+
 export default function WalrusTestPage() {
   const [aggregatorUrl] = useState(
     process.env.NEXT_PUBLIC_WALRUS_AGGREGATOR_URL || 
@@ -56,6 +69,14 @@ export default function WalrusTestPage() {
   const [audioBuffering, setAudioBuffering] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Private Vault Demo State
+  const [vaultDemo, setVaultDemo] = useState<PrivateVaultDemo>({
+    correctAccess: { status: 'idle' },
+    incorrectAccess: { status: 'idle' }
+  });
+  const [privateVaultBlobId] = useState('example_private_vault_blob_id_123');
+  const [userApiKey, setUserApiKey] = useState('');
 
   // Enhanced upload with real XMLHttpRequest for progress tracking
   const uploadFileWithProgress = async (file: File, isDraft: boolean): Promise<BlobInfo | null> => {
@@ -231,6 +252,67 @@ export default function WalrusTestPage() {
         audioRef.current.src = `${aggregatorUrl}/v1/blobs/${selectedBlob.blobId}`;
         audioRef.current.load();
       }
+    }
+  };
+
+  // Simulate correct vault access with API key
+  const handleCorrectVaultAccess = async () => {
+    setVaultDemo(prev => ({
+      ...prev,
+      correctAccess: { status: 'loading' }
+    }));
+
+    try {
+      // Simulate API call with proper authentication
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // In a real implementation, this would decrypt content using the API key
+      const decryptedContent = `🔓 Successfully accessed private vault!
+      
+Content: "Secret audio file - Only accessible with valid API key"
+Vault ID: ${privateVaultBlobId}
+Access granted with key: ${userApiKey || 'default-test-key'}
+Timestamp: ${new Date().toISOString()}`;
+
+      setVaultDemo(prev => ({
+        ...prev,
+        correctAccess: { 
+          status: 'success',
+          data: decryptedContent
+        }
+      }));
+    } catch {
+      setVaultDemo(prev => ({
+        ...prev,
+        correctAccess: { 
+          status: 'error',
+          error: 'Failed to access vault'
+        }
+      }));
+    }
+  };
+
+  // Simulate incorrect vault access without API key
+  const handleIncorrectVaultAccess = async () => {
+    setVaultDemo(prev => ({
+      ...prev,
+      incorrectAccess: { status: 'loading' }
+    }));
+
+    try {
+      // Simulate API call without authentication
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // This would fail in real implementation
+      throw new Error('Unauthorized: Missing or invalid API key');
+    } catch (error) {
+      setVaultDemo(prev => ({
+        ...prev,
+        incorrectAccess: { 
+          status: 'error',
+          error: error instanceof Error ? error.message : 'Access denied'
+        }
+      }));
     }
   };
 
@@ -521,11 +603,107 @@ export default function WalrusTestPage() {
           </section>
         </div>
 
+        {/* Private Vault Demo Section */}
+        <div className="mt-8">
+          <section className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
+              4. Private Vault Access Demo
+            </h2>
+            <div className="space-y-6">
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <p className="text-sm text-blue-800 dark:text-blue-200 mb-2">
+                  This demo shows how private vaults work with API key authentication.
+                  Only users with the correct API key can decrypt and access vault contents.
+                </p>
+              </div>
+
+              {/* API Key Input */}
+              <div>
+                <label htmlFor="api-key" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Enter Your API Key (optional - will use default if empty)
+                </label>
+                <input
+                  id="api-key"
+                  type="text"
+                  value={userApiKey}
+                  onChange={(e) => setUserApiKey(e.target.value)}
+                  placeholder="your-secret-api-key"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Correct Access Example */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200">
+                    ✅ Correct Implementation
+                  </h3>
+                  <button
+                    onClick={handleCorrectVaultAccess}
+                    disabled={vaultDemo.correctAccess.status === 'loading'}
+                    className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {vaultDemo.correctAccess.status === 'loading' 
+                      ? 'Accessing Vault...' 
+                      : 'Access Vault WITH API Key'}
+                  </button>
+                  
+                  {vaultDemo.correctAccess.status === 'success' && (
+                    <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                      <pre className="text-xs text-green-800 dark:text-green-200 whitespace-pre-wrap">
+                        {vaultDemo.correctAccess.data}
+                      </pre>
+                    </div>
+                  )}
+                </div>
+
+                {/* Incorrect Access Example */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200">
+                    ❌ Incorrect Implementation
+                  </h3>
+                  <button
+                    onClick={handleIncorrectVaultAccess}
+                    disabled={vaultDemo.incorrectAccess.status === 'loading'}
+                    className="w-full px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {vaultDemo.incorrectAccess.status === 'loading' 
+                      ? 'Attempting Access...' 
+                      : 'Access Vault WITHOUT API Key'}
+                  </button>
+                  
+                  {vaultDemo.incorrectAccess.status === 'error' && (
+                    <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                      <p className="text-sm text-red-800 dark:text-red-300">
+                        🚫 {vaultDemo.incorrectAccess.error}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Technical Explanation */}
+              <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  How It Works:
+                </h4>
+                <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1 list-disc list-inside">
+                  <li>Private vaults store encrypted content on Walrus</li>
+                  <li>Content is encrypted with AES-256 before uploading</li>
+                  <li>Only users with the correct API key can decrypt</li>
+                  <li>Keys can be shared with specific users for access control</li>
+                  <li>Without the key, the content remains encrypted and inaccessible</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+        </div>
+
         {/* Configuration & API Info */}
         <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
           <section className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
-              4. Configuration
+              5. Configuration
             </h2>
             <div className="space-y-3 text-sm">
               <div>
@@ -541,7 +719,7 @@ export default function WalrusTestPage() {
 
           <section className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
-              5. Test Results
+              6. Test Results
             </h2>
             <div className="space-y-2 text-sm">
               <p className="text-gray-700 dark:text-gray-300">
