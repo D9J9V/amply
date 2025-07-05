@@ -18,17 +18,44 @@ export default function CreateLiveListeningParty() {
     setLoading(true);
 
     try {
-      // Create a demo user for now
-      const userId = Math.random().toString(36).substring(7);
-      const { data: user } = await supabase
-        .from('users')
-        .upsert({
-          id: userId,
+      // Get or create user for MVP demo
+      let userId = localStorage.getItem('amply_demo_user_id');
+      let user;
+      
+      if (!userId) {
+        // Create a new user
+        const newUser = {
+          id: crypto.randomUUID(),
           username: `Artist_${Math.floor(Math.random() * 1000)}`,
           avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${Math.random()}`
-        })
-        .select()
-        .single();
+        };
+        
+        const { data, error } = await supabase
+          .from('users')
+          .insert(newUser)
+          .select()
+          .single();
+        
+        if (error) throw error;
+        
+        user = data;
+        localStorage.setItem('amply_demo_user_id', data.id);
+      } else {
+        // Get existing user
+        const { data } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', userId)
+          .single();
+        
+        if (data) {
+          user = data;
+        } else {
+          // User not found, clear and retry
+          localStorage.removeItem('amply_demo_user_id');
+          return handleSubmit(e);
+        }
+      }
 
       // Create the live party
       const { data: party, error } = await supabase

@@ -34,15 +34,14 @@ export default function TestListeningParty() {
   const testSupabaseConnection = async () => {
     setLoading(prev => ({ ...prev, connection: true }));
     try {
-      const { data, error } = await supabase
+      const { data, error, count } = await supabase
         .from('users')
-        .select('count(*)')
-        .limit(1);
+        .select('*', { count: 'exact', head: true });
       
       addTestResult('connection', {
         success: !error,
         message: error ? error.message : 'Connected successfully',
-        data
+        data: { count }
       });
     } catch (error) {
       addTestResult('connection', {
@@ -59,7 +58,7 @@ export default function TestListeningParty() {
     setLoading(prev => ({ ...prev, createUser: true }));
     try {
       const testUser = {
-        id: `test_${Date.now()}`,
+        id: crypto.randomUUID(),
         username: `TestUser_${Math.floor(Math.random() * 1000)}`,
         avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${Math.random()}`
       };
@@ -90,7 +89,7 @@ export default function TestListeningParty() {
     setLoading(prev => ({ ...prev, createParty: true }));
     try {
       // First create a host user
-      const hostId = `host_${Date.now()}`;
+      const hostId = crypto.randomUUID();
       await supabase.from('users').insert({
         id: hostId,
         username: `Host_${Math.floor(Math.random() * 1000)}`,

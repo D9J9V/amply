@@ -89,15 +89,50 @@ export default function LiveListeningParty() {
   // Initialize user and verify
   useEffect(() => {
     const initUser = async () => {
-      // For demo, create a temporary user
-      const tempUser: User = {
-        id: Math.random().toString(36).substring(7),
-        username: `User_${Math.floor(Math.random() * 1000)}`,
-        avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${Math.random()}`,
-        created_at: new Date().toISOString()
-      };
-      setCurrentUser(tempUser);
-      setIsVerified(true); // Skip World ID for demo
+      // For MVP demo, create or retrieve a user from localStorage/database
+      let userId = localStorage.getItem('amply_demo_user_id');
+      
+      if (!userId) {
+        // Create a new user in the database
+        const newUser = {
+          id: crypto.randomUUID(),
+          username: `User_${Math.floor(Math.random() * 1000)}`,
+          avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${Math.random()}`
+        };
+        
+        const { data, error } = await supabase
+          .from('users')
+          .insert(newUser)
+          .select()
+          .single();
+        
+        if (error) {
+          console.error('Error creating user:', error);
+          return;
+        }
+        
+        if (data) {
+          setCurrentUser(data);
+          localStorage.setItem('amply_demo_user_id', data.id);
+          setIsVerified(true); // Skip World ID for MVP demo
+        }
+      } else {
+        // Retrieve existing user
+        const { data } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', userId)
+          .single();
+        
+        if (data) {
+          setCurrentUser(data);
+          setIsVerified(true); // Skip World ID for MVP demo
+        } else {
+          // User not found, clear localStorage and try again
+          localStorage.removeItem('amply_demo_user_id');
+          initUser();
+        }
+      }
     };
     
     initUser();

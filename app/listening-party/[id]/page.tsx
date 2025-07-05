@@ -4,6 +4,7 @@ import { useState } from "react";
 // import { useParams } from "next/navigation"; // Will use when connecting to backend
 import Link from "next/link";
 import Image from "next/image";
+import { supabase } from "@/lib/supabase/client";
 import SpotifyPlayer from "../components/SpotifyPlayer";
 import SpotifySearch from "../components/SpotifySearch";
 
@@ -84,12 +85,34 @@ export default function ListeningPartyRoom() {
 
   const currentTrack = playlist[currentTrackIndex];
 
-  // Simulate World ID verification
-  const handleVerification = () => {
-    // In production, this would trigger World ID SDK
+  // Simulate World ID verification for MVP
+  const handleVerification = async () => {
+    // For MVP demo, create or retrieve a user from localStorage/database
+    let userId = localStorage.getItem('amply_demo_user_id');
+    
+    if (!userId) {
+      // Create a new user in the database
+      const newUser = {
+        id: crypto.randomUUID(),
+        username: `User_${Math.floor(Math.random() * 1000)}`,
+        avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${Math.random()}`
+      };
+      
+      const { data } = await supabase
+        .from('users')
+        .insert(newUser)
+        .select()
+        .single();
+      
+      if (data) {
+        localStorage.setItem('amply_demo_user_id', data.id);
+      }
+    }
+    
+    // Skip actual World ID verification for MVP
     setTimeout(() => {
       setIsVerified(true);
-      // Check if user is host (for demo, make first user the host)
+      // For demo purposes, make first user the host
       setIsHost(true);
     }, 1000);
   };
