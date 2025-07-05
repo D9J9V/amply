@@ -7,13 +7,13 @@ import { supabase } from "@/lib/supabase/client";
 import { 
   ListeningParty, 
   PartyMessage, 
-  PartyParticipant, 
   PlaybackState,
   User 
 } from "@/lib/supabase/types";
 import { useWebRTC } from "@/hooks/useWebRTC";
 import SyncedSpotifyPlayer from "../../components/SyncedSpotifyPlayer";
 import PartyPlaylist from "../../components/PartyPlaylist";
+import PartyPresence from "../../components/PartyPresence";
 
 export default function LiveListeningParty() {
   const params = useParams();
@@ -26,7 +26,6 @@ export default function LiveListeningParty() {
   
   // Party state
   const [party, setParty] = useState<ListeningParty | null>(null);
-  const [participants, setParticipants] = useState<PartyParticipant[]>([]);
   const [messages, setMessages] = useState<PartyMessage[]>([]);
   const [playbackState, setPlaybackState] = useState<PlaybackState>({
     party_id: partyId,
@@ -62,18 +61,7 @@ export default function LiveListeningParty() {
   // Realtime subscriptions
   const messagesChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const playbackChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
-  const participantsChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
-  // Load participants
-  const loadParticipants = useCallback(async () => {
-    const { data } = await supabase
-      .from('party_participants')
-      .select('*, user:users!user_id(*)')
-      .eq('party_id', partyId)
-      .is('left_at', null);
-    
-    if (data) setParticipants(data);
-  }, [partyId]);
 
   // Load messages
   const loadMessages = useCallback(async () => {
@@ -145,7 +133,6 @@ export default function LiveListeningParty() {
         });
 
         // Load initial data
-        await loadParticipants();
         await loadMessages();
         await loadPlaybackState();
 
@@ -157,7 +144,7 @@ export default function LiveListeningParty() {
     };
 
     loadPartyData();
-  }, [isVerified, currentUser, partyId, router, loadParticipants, loadMessages, loadPlaybackState]);
+  }, [isVerified, currentUser, partyId, router, loadMessages, loadPlaybackState]);
 
   // Set up realtime subscriptions
   useEffect(() => {
@@ -206,22 +193,6 @@ export default function LiveListeningParty() {
       )
       .subscribe();
 
-    // Participants subscription
-    participantsChannelRef.current = supabase
-      .channel(`party-participants:${partyId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'party_participants',
-          filter: `party_id=eq.${partyId}`
-        },
-        () => {
-          loadParticipants();
-        }
-      )
-      .subscribe();
 
     // Cleanup
     return () => {
@@ -231,11 +202,8 @@ export default function LiveListeningParty() {
       if (playbackChannelRef.current) {
         supabase.removeChannel(playbackChannelRef.current);
       }
-      if (participantsChannelRef.current) {
-        supabase.removeChannel(participantsChannelRef.current);
-      }
     };
-  }, [isVerified, currentUser, partyId, loadParticipants]);
+  }, [isVerified, currentUser, partyId]);
 
 
 
@@ -304,15 +272,22 @@ export default function LiveListeningParty() {
           {/* Header */}
           <div className="bg-gray-900 border-b border-gray-800 p-4">
             <div className="flex justify-between items-center">
-              <div>
-                <h1 className="text-2xl font-bold">{party.title}</h1>
-                <p className="text-gray-400">
-                  Hosted by {party.host?.username} • {participants.length} listening
-                </p>
+              <div className="flex-1">
+                <h1 className="text-2xl font-bold mb-2">{party.title}</h1>
+                <div className="flex items-center gap-6">
+                  <p className="text-gray-400">
+                    Hosted by {party.host?.username}
+                  </p>
+                  <PartyPresence 
+                    partyId={partyId}
+                    currentUserId={currentUser?.id || ''}
+                    maxDisplay={5}
+                  />
+                </div>
               </div>
               <button
                 onClick={handleLeaveParty}
-                className="text-red-400 hover:text-red-300"
+                className="text-red-400 hover:text-red-300 ml-4"
               >
                 Leave Party
               </button>
@@ -454,7 +429,7 @@ export default function LiveListeningParty() {
         <div className="bg-gray-900 border-l border-gray-800 flex flex-col">
           <div className="p-4 border-b border-gray-800">
             <h3 className="font-semibold">Live Chat</h3>
-            <p className="text-sm text-gray-400">{participants.length} verified humans</p>
+            <p className="text-sm text-gray-400">Verified humans only</p>
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
