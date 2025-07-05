@@ -110,9 +110,16 @@ export function useWebRTC({ partyId, userId, isHost, enabled = true }: UseWebRTC
     if (!localStream) return;
 
     const videoTracks = localStream.getVideoTracks();
+    const isCurrentlyEnabled = videoTracks[0]?.enabled ?? false;
+    
     videoTracks.forEach(track => {
-      track.enabled = !track.enabled;
+      track.enabled = !isCurrentlyEnabled;
     });
+
+    // Don't reset the video element srcObject when toggling
+    // This maintains the stream connection
+    
+    console.log('[WebRTC] Video toggled:', !isCurrentlyEnabled ? 'ON' : 'OFF');
   }, [localStream]);
 
   // Get media states

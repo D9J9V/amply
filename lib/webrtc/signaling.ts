@@ -27,22 +27,31 @@ export class WebRTCSignaling {
       this.stream = stream;
     }
 
+    console.log('[WebRTC] Initializing signaling for', this.isHost ? 'host' : 'participant', 'with stream:', !!stream);
+
     // Subscribe to signaling channel
     this.signalChannel = supabase
       .channel(`webrtc-signal:${this.partyId}`)
       .on('broadcast', { event: 'signal' }, (payload) => {
         this.handleSignal(payload.payload as SignalData);
       })
-      .subscribe();
-
-    // If host, wait for participants to join
-    // If participant, send offer to host
-    if (!this.isHost) {
-      await this.connectToHost();
-    }
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('[WebRTC] Subscribed to signaling channel');
+          
+          // If participant, send offer to host after subscription
+          if (!this.isHost) {
+            // Small delay to ensure host is ready
+            setTimeout(() => {
+              this.connectToHost();
+            }, 1000);
+          }
+        }
+      });
   }
 
   private async connectToHost() {
+    console.log('[WebRTC] Participant connecting to host...');
     const peer = new SimplePeer({
       initiator: true,
       trickle: true,
@@ -55,6 +64,7 @@ export class WebRTCSignaling {
     });
 
     peer.on('signal', (data) => {
+      console.log('[WebRTC] Sending offer to host');
       this.sendSignal({
         type: 'offer',
         from: this.userId,
@@ -64,11 +74,16 @@ export class WebRTCSignaling {
     });
 
     peer.on('stream', (stream) => {
+      console.log('[WebRTC] Received stream from host');
       this.onRemoteStream('host', stream);
     });
 
+    peer.on('connect', () => {
+      console.log('[WebRTC] Connected to host!');
+    });
+
     peer.on('error', (err) => {
-      console.error('Peer error:', err);
+      console.error('[WebRTC] Peer error:', err);
     });
 
     this.peers.set('host', peer);
@@ -93,8 +108,10 @@ export class WebRTCSignaling {
   }
 
   private handleParticipantOffer(data: SignalData) {
+    console.log('[WebRTC] Host received offer from participant:', data.from);
+    
     if (!this.stream) {
-      console.error('No stream available for host');
+      console.error('[WebRTC] No stream available for host');
       return;
     }
 
@@ -111,6 +128,7 @@ export class WebRTCSignaling {
     });
 
     peer.on('signal', (signal) => {
+      console.log('[WebRTC] Host sending answer to participant:', data.from);
       this.sendSignal({
         type: 'answer',
         from: this.userId,
@@ -119,8 +137,12 @@ export class WebRTCSignaling {
       });
     });
 
+    peer.on('connect', () => {
+      console.log('[WebRTC] Host connected to participant:', data.from);
+    });
+
     peer.on('error', (err) => {
-      console.error('Peer error:', err);
+      console.error('[WebRTC] Host peer error:', err);
     });
 
     peer.signal(data.signal);
@@ -164,9 +186,22 @@ export class WebRTCSignaling {
     this.stream = stream;
     
     // Update all existing peer connections with new stream
-    this.peers.forEach((peer) => {
+    this.peers.forEach((peer, peerId) => {
       if (peer.destroyed === false) {
-        peer.addStream(stream);
+        try {
+          // Remove old tracks and add new ones
+          const senders = (peer as any)._pc?.getSenders() || [];
+          senders.forEach((sender: RTCRtpSender) => {
+            if (sender.track) {
+              const newTrack = stream.getTracks().find(t => t.kind === sender.track!.kind);
+              if (newTrack) {
+                sender.replaceTrack(newTrack);
+              }
+            }
+          });
+        } catch (err) {
+          console.error(`Error updating stream for peer ${peerId}:`, err);
+        }
       }
     });
   }
