@@ -1,8 +1,40 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --amply-orange: #ff8c00;
+  --amply-pink: #ff0080;
+  --amply-pink-light: #fdc2db;
+  --amply-black: #000000;
+  --amply-cream: #fdf9f2;
+  --amply-beige: #f5efdf;
+  --amply-gray: #f8f9fa;
+  --amply-white: #ffffff;
+  --background: 0 0% 100%;
+  --foreground: 0 0% 3.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 3.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 3.9%;
+  --primary: 0 0% 9%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 0 0% 96.1%;
+  --secondary-foreground: 0 0% 9%;
+  --muted: 0 0% 96.1%;
+  --muted-foreground: 0 0% 45.1%;
+  --accent: 0 0% 96.1%;
+  --accent-foreground: 0 0% 9%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 0 0% 89.8%;
+  --input: 0 0% 89.8%;
+  --ring: 0 0% 3.9%;
+  --radius: 1rem;
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
 }
 
 @theme inline {
@@ -12,15 +44,363 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  border-color: var(--border-color);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--amply-black);
+  background: var(--amply-gray);
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  font-feature-settings: "rlig" 1, "calt" 1;
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-amply-gray-light text-amply-black font-sans antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-weight: 700;
+    color: var(--amply-black);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Modern Card Styles */
+  .amply-card {
+    @apply bg-amply-white border border-gray-100 shadow-card rounded-3xl;
+    backdrop-filter: blur(10px);
+  }
+
+  .amply-card-hover {
+    @apply hover:shadow-card-hover hover:border-gray-200 transition-all duration-300;
+  }
+
+  /* Modern Button Styles */
+  .amply-button-primary {
+    @apply bg-amply-gradient-soft text-white font-semibold rounded-2xl px-6 py-3 shadow-amply hover:shadow-amply-lg transform hover:-translate-y-0.5 transition-all duration-200;
+  }
+
+  .amply-button-secondary {
+    @apply bg-amply-gradient-pink text-white font-semibold rounded-2xl px-6 py-3 shadow-amply-pink hover:shadow-amply-lg transform hover:-translate-y-0.5 transition-all duration-200;
+  }
+
+  .amply-button-outline {
+    @apply border-2 border-gray-200 text-gray-700 bg-amply-white hover:bg-gray-50 hover:border-gray-300 font-medium rounded-2xl px-6 py-3 transition-all duration-200;
+  }
+
+  /* World ID Badge */
+  .world-id-badge {
+    @apply bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xs font-medium px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-minimal;
+  }
+
+  .verified-human-badge {
+    @apply bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs font-medium px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-minimal;
+  }
+
+  /* Clean Input Styles */
+  .amply-input {
+    @apply bg-amply-white border border-gray-200 text-amply-black placeholder-gray-400 rounded-2xl px-4 py-3 focus:border-amply-orange focus:ring-2 focus:ring-amply-orange/20 transition-all duration-200;
+  }
+
+  /* Spacing Utilities */
+  .section-padding {
+    @apply px-6 py-12;
+  }
+
+  .container-padding {
+    @apply px-6 md:px-8 lg:px-12;
+  }
+
+  /* Text Utilities */
+  .text-gradient {
+    @apply bg-amply-gradient-soft bg-clip-text text-transparent;
+  }
+
+  /* Mobile-First Responsive Utilities */
+
+  /* Mobile-optimized spacing */
+  .mobile-padding {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+
+  .mobile-padding-y {
+    @apply py-4 sm:py-6 lg:py-8;
+  }
+
+  /* Touch-friendly interactive elements */
+  .touch-target {
+    @apply min-h-touch min-w-[44px] flex items-center justify-center;
+  }
+
+  /* Mobile-safe text sizing */
+  .text-mobile-sm {
+    @apply text-sm sm:text-base;
+  }
+
+  .text-mobile-base {
+    @apply text-base sm:text-lg;
+  }
+
+  .text-mobile-lg {
+    @apply text-lg sm:text-xl;
+  }
+
+  .text-mobile-xl {
+    @apply text-xl sm:text-2xl;
+  }
+
+  .text-mobile-2xl {
+    @apply text-2xl sm:text-3xl;
+  }
+
+  .text-mobile-3xl {
+    @apply text-3xl sm:text-4xl;
+  }
+
+  /* Responsive cards */
+  .amply-card-mobile {
+    @apply amply-card p-4 sm:p-6;
+  }
+
+  /* Mobile-safe grid layouts */
+  .grid-mobile-responsive {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6;
+  }
+
+  /* Safe area support */
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Mobile navigation fixes */
+  .mobile-nav-height {
+    @apply h-16 sm:h-20;
+  }
+
+  /* Prevent text overflow */
+  .text-ellipsis-mobile {
+    @apply truncate sm:text-clip;
+  }
+
+  /* Mobile-friendly buttons */
+  .amply-button-mobile {
+    @apply amply-button-primary py-3 px-6 text-sm sm:text-base touch-target;
+  }
+
+  /* Responsive modal */
+  .modal-mobile {
+    @apply w-full max-w-sm sm:max-w-md lg:max-w-lg mx-4 sm:mx-auto;
+  }
+}
+
+/* Custom animations */
+@keyframes gentle-float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes soft-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes bounce-gentle {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Animation Classes */
+.animate-gentle-float {
+  animation: gentle-float 3s ease-in-out infinite;
+}
+
+.animate-soft-pulse {
+  animation: soft-pulse 2s ease-in-out infinite;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.2s ease-out;
+}
+
+.animate-bounce-gentle {
+  animation: bounce-gentle 2s ease-in-out infinite;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #ff8c00 0%, #fdc2db 100%);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #ff0080 0%, #fdc2db 100%);
+}
+
+/* Hide scrollbar for snap scroll containers */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Text clamp utilities */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Focus styles */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-amply-orange focus:ring-offset-2 focus:ring-offset-amply-white;
+}
+
+/* Glass morphism effect */
+.glass {
+  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #ff8c00 0%, #fdc2db 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Mobile-specific overrides */
+@media (max-width: 640px) {
+  .snap-y {
+    scroll-snap-type: y mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Ensure proper touch scrolling on iOS */
+  .scrollbar-hide {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Prevent zoom on input focus */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Landscape mobile adjustments */
+@media (max-height: 500px) and (orientation: landscape) {
+  .landscape-adjust {
+    @apply py-2;
+  }
 }
