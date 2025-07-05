@@ -49,6 +49,33 @@ Building Amply as a World Mini App provides unprecedented advantages for emergin
 
 This Web3 approach solves real problems for emerging artists: discovery, ownership, and fair compensation. By leveraging World's verified user base, Walrus's permanent storage, and Ledger's secure ownership, Amply creates a music ecosystem where artists truly thrive.
 
+## Core Features
+
+### 🎉 **Listening Party Playlists**
+A revolutionary feature that creates authentic, moment-based music curation through verified human participation.
+
+#### How It Works
+1. **Artist Creates Party**: Artists host exclusive listening sessions for new releases or special events
+2. **Verified Humans Only**: Attendees must verify with World ID to join (no bots allowed)
+3. **Collaborative Curation**: During the party, attendees can add songs to create a unique playlist
+4. **Spotify Integration**: Seamless playback with synchronized controls for all participants
+5. **NFT Memento**: The collaborative playlist becomes an NFT owned by participants
+
+#### Key Benefits
+- **For Artists**: Get authentic feedback and create deeper fan connections
+- **For Fans**: Exclusive access and "I was there" social proof
+- **For Curators**: Build reputation through quality playlist contributions
+- **Anti-Bot Guarantee**: 100% real music fans, verified through World ID
+
+#### Technical Features
+- Real-time synchronized playback using Spotify iFrame API
+- OAuth integration for easy playlist import/export
+- World ID verification for each participant
+- On-chain playlist history (immutable record of the moment)
+- Limited capacity (100-500 participants) for intimacy
+
+This feature transforms playlists from algorithm-driven or pay-to-play lists into authentic, human-curated collections that capture the energy and taste of real moments.
+
 ## How it's Made
 
 Amply is a robust and decentralized Web3 application designed to create a fair and transparent ecosystem for creators and audiences. It achieves this by fusing several cutting-edge technologies:
@@ -140,6 +167,13 @@ pnpm start
 │       ├── /feed/pop
 │       └── /feed/[dynamic-genre]
 │
+├── /listening-party
+│   └── (Verified human music curation)
+│       ├── /listening-party          → Active parties & discovery
+│       ├── /listening-party/create   → Host a new party
+│       ├── /listening-party/[id]     → Join specific party
+│       └── /listening-party/history  → Past parties & playlists
+│
 └── /test
     └── (Development testing routes)
         ├── /test/world      → World ID integration tests
@@ -197,6 +231,37 @@ Dynamic content feeds organized by musical genres:
 - **Genre Discovery**: Helps users explore specific musical styles
 
 Each feed maintains a consistent layout while dynamically loading genre-specific content, ensuring authentic discovery experiences free from bot manipulation.
+
+#### **`/listening-party` - Listening Party Playlists**
+Collaborative music curation experiences with verified humans:
+
+- **`/listening-party`**: Browse and discover active listening parties:
+  - Live party listings with participant counts
+  - Upcoming scheduled parties
+  - Featured artists hosting parties
+  - Genre and mood filters
+
+- **`/listening-party/create`**: Artist interface to host a party:
+  - Set party theme and duration
+  - Choose capacity (100-500 verified humans)
+  - Import initial playlist from Spotify
+  - Schedule or start immediately
+  - Configure participation rules
+
+- **`/listening-party/[id]`**: Live party experience:
+  - World ID verification gate
+  - Synchronized Spotify playback for all participants
+  - Real-time playlist additions
+  - Live chat with verified humans only
+  - Artist can control playback for everyone
+  - Collaborative voting on next tracks
+
+- **`/listening-party/history`**: Archive of past parties:
+  - Browse completed party playlists
+  - View participant lists and contributions
+  - Access NFT versions of playlists
+  - Track your participation history
+  - Discover playlists from parties you missed
 
 #### **`/test` - Development Testing Routes**
 Isolated testing environments for each major integration:

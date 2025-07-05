@@ -9,10 +9,13 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@spotify/web-api-ts-sdk": "^1.2.0",
     "@walletconnect/core": "^2.21.4",
     "@walletconnect/utils": "^2.21.4",
     "@walletconnect/web3wallet": "^1.16.1",
     "@worldcoin/minikit-js": "^1.9.6",
+    "date-fns": "^4.1.0",
+    "eruda": "^3.4.3",
     "ethers": "^6",
     "next": "15.3.5",
     "react": "^19.0.0",
