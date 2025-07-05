@@ -63,7 +63,11 @@ body {
     border-color: hsl(var(--border));
   }
   body {
-    @apply bg-amply-gray-light text-amply-black font-sans antialiased;
+    background-color: #FAFBFC;
+    color: #000000;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 

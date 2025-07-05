@@ -38,13 +38,10 @@ export default function LiveStreamPage() {
   const [chatMessage, setChatMessage] = useState("")
   const [viewers, setViewers] = useState(1247)
   const [likes, setLikes] = useState(892)
-  const [volume, setVolume] = useState(75)
   const [currentTime, setCurrentTime] = useState(0)
-  const [duration, setDuration] = useState(4325) // 1:12:05
   const [isConnected, setIsConnected] = useState(false)
   const [showControls, setShowControls] = useState(true)
   const [isChatVisible, setIsChatVisible] = useState(true)
-  const videoRef = useRef<HTMLVideoElement>(null)
   const chatEndRef = useRef<HTMLDivElement>(null)
 
   // Mock live stream data
