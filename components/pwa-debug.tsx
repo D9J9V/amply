@@ -134,6 +134,7 @@ export default function PWADebug() {
           </div>
 
           {/* Service Worker Status */}
+
           <div>
             <h3 className="font-semibold mb-3">Service Worker</h3>
             <Badge variant={swStatus === "active" ? "default" : "destructive"} className="mb-2">
@@ -142,6 +143,7 @@ export default function PWADebug() {
           </div>
 
           {/* Manifest Info */}
+
           {manifestData && (
             <div>
               <h3 className="font-semibold mb-3">Manifest</h3>
