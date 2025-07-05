@@ -102,19 +102,19 @@ export default function PWADebug() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
                 <span className="text-sm">Standalone Mode</span>
-                {getStatusIcon(debugInfo.isStandalone)}
+                {getStatusIcon(debugInfo.isStandalone as boolean)}
               </div>
               <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
                 <span className="text-sm">Service Worker</span>
-                {getStatusIcon(debugInfo.hasServiceWorker)}
+                {getStatusIcon(debugInfo.hasServiceWorker as boolean)}
               </div>
               <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
                 <span className="text-sm">HTTPS/Secure</span>
-                {getStatusIcon(debugInfo.isSecure)}
+                {getStatusIcon(debugInfo.isSecure as boolean)}
               </div>
               <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
                 <span className="text-sm">Install Prompt</span>
-                {getStatusIcon(debugInfo.hasBeforeInstallPrompt)}
+                {getStatusIcon(debugInfo.hasBeforeInstallPrompt as boolean)}
               </div>
             </div>
           </div>
