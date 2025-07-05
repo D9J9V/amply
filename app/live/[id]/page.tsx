@@ -365,7 +365,7 @@ export default function LiveStreamPage() {
                         Verified
                       </Badge>
                     )}
-                    {message.humanVerified && <WorldIdBadge size="xs" />}
+                    {message.humanVerified && <WorldIdBadge size="sm" />}
                     <span className="text-gray-500 text-xs">{message.timestamp}</span>
                   </div>
                   <p className="text-gray-700 text-sm leading-relaxed">{message.message}</p>

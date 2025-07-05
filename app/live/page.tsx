@@ -237,7 +237,7 @@ export default function LivePage() {
 
                 <div className="flex items-center space-x-2 flex-wrap">
                   <p className="text-gray-600 font-medium text-sm sm:text-base">{s.artist}</p>
-                  {s.humanVerified && <WorldIdBadge size="xs" className="flex-shrink-0" />}
+                  {s.humanVerified && <WorldIdBadge size="sm" className="flex-shrink-0" />}
                 </div>
 
                 <div className="flex items-center justify-between text-xs sm:text-sm text-gray-500">

@@ -313,7 +313,7 @@ export default function LibraryPage() {
                       <div className="flex items-center space-x-2">
                         <p className="text-gray-600">{item.artist}</p>
                         {item.verified && <Star className="w-4 h-4 text-amply-orange" />}
-                        {item.humanVerified && <WorldIdBadge size="xs" />}
+                        {item.humanVerified && <WorldIdBadge size="sm" />}
                       </div>
 
                       <div className="flex items-center justify-between text-sm text-gray-500">
@@ -393,7 +393,7 @@ export default function LibraryPage() {
                     <div className="flex items-center space-x-2">
                       <p className="text-gray-600">{item.artist}</p>
                       {item.verified && <Star className="w-4 h-4 text-amply-orange" />}
-                      {item.humanVerified && <WorldIdBadge size="xs" />}
+                      {item.humanVerified && <WorldIdBadge size="sm" />}
                     </div>
 
                     <div className="flex items-center justify-between text-sm text-gray-500">
@@ -451,7 +451,7 @@ export default function LibraryPage() {
 
                     <div className="flex items-center space-x-2">
                       <p className="text-gray-600">by {item.creator}</p>
-                      {item.humanVerified && <WorldIdBadge size="xs" />}
+                      {item.humanVerified && <WorldIdBadge size="sm" />}
                     </div>
 
                     <div className="flex items-center justify-between text-sm text-gray-500">
@@ -508,7 +508,7 @@ export default function LibraryPage() {
                       <div className="flex items-center space-x-2">
                         <p className="text-gray-600">{item.artist}</p>
                         {item.verified && <Star className="w-4 h-4 text-amply-orange" />}
-                        {item.humanVerified && <WorldIdBadge size="xs" />}
+                        {item.humanVerified && <WorldIdBadge size="sm" />}
                       </div>
 
                       <div className="flex items-center justify-between text-sm text-gray-500">

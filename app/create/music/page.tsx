@@ -191,7 +191,7 @@ export default function CreateMusicPage() {
                       <div className="flex-1">
                         <div className="flex items-center space-x-2 mb-1">
                           <h4 className="font-semibold text-amply-black">Your Track Title</h4>
-                          <WorldIdBadge size="xs" />
+                          <WorldIdBadge size="sm" />
                         </div>
                         <p className="text-gray-600">Your Artist Name</p>
                       </div>
