@@ -54,9 +54,13 @@ function Calendar({
         ...classNames,
       }}
       components={{
-        IconLeft: () => <ChevronLeft className="h-4 w-4" />,
-        IconRight: () => <ChevronRight className="h-4 w-4" />,
-      } as React.ComponentProps<typeof DayPicker>["components"]}
+        Chevron: ({ orientation, ...props }) => {
+          if (orientation === "left") {
+            return <ChevronLeft className="h-4 w-4" {...props} />
+          }
+          return <ChevronRight className="h-4 w-4" {...props} />
+        },
+      }}
       {...props}
     />
   )

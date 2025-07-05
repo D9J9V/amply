@@ -1,19 +1,7 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import ErudaConsole from "@/components/ErudaConsole";
-import BottomNavigation from "@/components/bottom-navigation";
-import { ThemeProvider } from "@/components/theme-provider";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import type React from "react"
+import type { Metadata } from "next"
+import BottomNavigation from "@/components/bottom-navigation"
+import "./globals.css"
 
 export const metadata: Metadata = {
   title: "Amply - The Future of Music is Human",
@@ -38,14 +26,14 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL("https://amply-seven.vercel.app"),
+  metadataBase: new URL("https://amply.app"),
   alternates: {
     canonical: "/",
   },
   openGraph: {
     title: "Amply - The Future of Music is Human",
     description: "Only real humans. Only real music. Empowering emerging artists with Web3 and World ID verification.",
-    url: "https://amply-seven.vercel.app",
+    url: "https://amply.app",
     siteName: "Amply",
     images: [
       {
@@ -84,15 +72,16 @@ export const metadata: Metadata = {
     apple: [{ url: "/icons/icon-180x180.png", sizes: "180x180", type: "image/png" }],
     shortcut: "/icons/icon-192x192.png",
   },
-};
+  generator: 'v0.dev'
+}
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <head>
         {/* PWA Meta Tags */}
         <meta name="application-name" content="Amply" />
@@ -118,7 +107,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png" />
         <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png" />
 
-        {/* Favicon */}
+        {/* Favicon - Updated for new logo */}
         <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png" />
         <link rel="shortcut icon" href="/favicon.ico" />
@@ -132,20 +121,10 @@ export default function RootLayout({
           content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover"
         />
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} bg-amply-gray-light font-sans antialiased safe-area-top safe-area-bottom`}
-      >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <ErudaConsole />
-          {children}
-          <BottomNavigation />
-          <div className="md:hidden h-20 safe-area-bottom"></div>
-        </ThemeProvider>
+      <body className="bg-amply-gray-light font-sans antialiased safe-area-top safe-area-bottom">
+        {children}
+        <BottomNavigation />
+        <div className="md:hidden h-20 safe-area-bottom"></div>
 
         {/* Service Worker Registration */}
         <script
@@ -167,5 +146,5 @@ export default function RootLayout({
         />
       </body>
     </html>
-  );
+  )
 }
