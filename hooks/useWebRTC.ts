@@ -39,10 +39,8 @@ export function useWebRTC({ partyId, userId, isHost, enabled = true }: UseWebRTC
 
       setLocalStream(stream);
       
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
-
+      // Video ref will be set by the effect that watches for stream changes
+      
       return stream;
     } catch (err) {
       console.error('Error accessing media devices:', err);
@@ -154,9 +152,29 @@ export function useWebRTC({ partyId, userId, isHost, enabled = true }: UseWebRTC
     }
 
     return () => {
-      disconnect();
+      // Clean up without using the disconnect callback to avoid circular deps
+      if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+      }
+      if (signalingRef.current) {
+        signalingRef.current.disconnect();
+      }
     };
-  }, [enabled, initializeWebRTC, disconnect]);
+  }, [enabled, partyId, userId, isHost]); // Remove initializeWebRTC and disconnect from deps
+
+  // Update video element when local stream changes
+  useEffect(() => {
+    if (videoRef.current && localStream) {
+      videoRef.current.srcObject = localStream;
+    }
+  }, [localStream]);
+
+  // Update remote video element when remote stream changes
+  useEffect(() => {
+    if (remoteVideoRef.current && remoteStream) {
+      remoteVideoRef.current.srcObject = remoteStream;
+    }
+  }, [remoteStream]);
 
   return {
     localStream,
