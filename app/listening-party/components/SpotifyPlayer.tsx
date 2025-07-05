@@ -9,9 +9,33 @@ interface SpotifyPlayerProps {
   syncState?: { playing: boolean; position: number };
 }
 
+interface SpotifyIFrameAPI {
+  createController: (
+    element: HTMLElement,
+    options: { uri: string; width: string; height: string },
+    callback: (controller: SpotifyController) => void
+  ) => void;
+}
+
+interface SpotifyController {
+  addListener: (event: string, callback: (data: PlaybackUpdateEvent | Record<string, unknown>) => void) => void;
+  play: () => void;
+  pause: () => void;
+  togglePlay: () => void;
+  seek: (position: number) => void;
+  destroy: () => void;
+}
+
+interface PlaybackUpdateEvent {
+  data: {
+    isPaused: boolean;
+    position: number;
+  };
+}
+
 declare global {
   interface Window {
-    onSpotifyIframeApiReady: (IFrameAPI: any) => void;
+    onSpotifyIframeApiReady: (IFrameAPI: SpotifyIFrameAPI) => void;
   }
 }
 
@@ -21,7 +45,7 @@ export default function SpotifyPlayer({
   onPlaybackChange,
   syncState 
 }: SpotifyPlayerProps) {
-  const embedController = useRef<any>(null);
+  const embedController = useRef<SpotifyController | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentPosition, setCurrentPosition] = useState(0);
@@ -33,7 +57,7 @@ export default function SpotifyPlayer({
     script.src = 'https://open.spotify.com/embed/iframe-api/v1';
     script.async = true;
 
-    window.onSpotifyIframeApiReady = (IFrameAPI: any) => {
+    window.onSpotifyIframeApiReady = (IFrameAPI: SpotifyIFrameAPI) => {
       const element = playerRef.current;
       if (!element) return;
 
@@ -43,7 +67,7 @@ export default function SpotifyPlayer({
         height: '152',
       };
 
-      const callback = (controller: any) => {
+      const callback = (controller: SpotifyController) => {
         embedController.current = controller;
         setIsReady(true);
 
@@ -52,12 +76,15 @@ export default function SpotifyPlayer({
           console.log('Spotify player ready');
         });
 
-        controller.addListener('playback_update', (e: any) => {
-          setIsPlaying(!e.data.isPaused);
-          setCurrentPosition(e.data.position);
-          
-          if (isHost && onPlaybackChange) {
-            onPlaybackChange(!e.data.isPaused, e.data.position);
+        controller.addListener('playback_update', (e) => {
+          if ('data' in e && typeof e.data === 'object' && e.data !== null && 'isPaused' in e.data && 'position' in e.data) {
+            const event = e as PlaybackUpdateEvent;
+            setIsPlaying(!event.data.isPaused);
+            setCurrentPosition(event.data.position);
+            
+            if (isHost && onPlaybackChange) {
+              onPlaybackChange(!event.data.isPaused, event.data.position);
+            }
           }
         });
       };
@@ -98,11 +125,11 @@ export default function SpotifyPlayer({
     embedController.current.togglePlay();
   };
 
-  const handleSeek = (position: number) => {
-    if (!embedController.current || !isHost) return;
-
-    embedController.current.seek(position);
-  };
+  // Seek functionality can be added in the future
+  // const handleSeek = (position: number) => {
+  //   if (!embedController.current || !isHost) return;
+  //   embedController.current.seek(position);
+  // };
 
   return (
     <div className="space-y-4">

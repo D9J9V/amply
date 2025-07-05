@@ -1,18 +1,23 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 // import { useParams } from "next/navigation"; // Will use when connecting to backend
 import Link from "next/link";
 import Image from "next/image";
+import SpotifyPlayer from "../components/SpotifyPlayer";
+import SpotifySearch from "../components/SpotifySearch";
 
 interface Track {
   id: string;
   name: string;
   artist: string;
+  album?: string;
+  image?: string;
   spotifyId: string;
   addedBy: string;
   addedByAvatar: string;
   votes: number;
+  duration?: number;
 }
 
 interface Message {
@@ -21,6 +26,11 @@ interface Message {
   avatar: string;
   text: string;
   timestamp: Date;
+}
+
+interface PlaybackState {
+  playing: boolean;
+  position: number;
 }
 
 export default function ListeningPartyRoom() {
@@ -34,25 +44,33 @@ export default function ListeningPartyRoom() {
       id: "1",
       name: "So What",
       artist: "Miles Davis",
+      album: "Kind of Blue",
+      image: "https://i.scdn.co/image/ab67616d0000b27343e0e2db5cd1a0e268e00420",
       spotifyId: "0qF2Og1j8uCbKsYqplryDH",
       addedBy: "Sarah Chen",
       addedByAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah",
-      votes: 12
+      votes: 12,
+      duration: 545000
     },
     {
       id: "2",
       name: "Take Five",
       artist: "Dave Brubeck",
+      album: "Time Out",
+      image: "https://i.scdn.co/image/ab67616d0000b273a48964b5d4394bfc2c5b4450",
       spotifyId: "1YQWosTIljIvxAgHWTp7KP",
       addedBy: "Alex Rivers",
       addedByAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex",
-      votes: 8
+      votes: 8,
+      duration: 324000
     }
   ]);
 
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [playbackState, setPlaybackState] = useState<PlaybackState>({
+    playing: false,
+    position: 0
+  });
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -64,7 +82,7 @@ export default function ListeningPartyRoom() {
   ]);
   const [newMessage, setNewMessage] = useState("");
 
-  const spotifyEmbedRef = useRef<HTMLDivElement>(null);
+  const currentTrack = playlist[currentTrackIndex];
 
   // Simulate World ID verification
   const handleVerification = () => {
@@ -76,40 +94,62 @@ export default function ListeningPartyRoom() {
     }, 1000);
   };
 
-  // Handle track control (host only)
-  const handlePlayPause = () => {
-    if (!isHost) return;
-    setIsPlaying(!isPlaying);
-    // In production, sync this state with all participants
+  // Handle playback state changes from host
+  const handlePlaybackChange = (playing: boolean, position: number) => {
+    setPlaybackState({ playing, position });
+    // In production, broadcast this state to all participants
   };
 
   const handleNextTrack = () => {
-    if (!isHost) return;
     if (currentTrackIndex < playlist.length - 1) {
       setCurrentTrackIndex(currentTrackIndex + 1);
+      setPlaybackState({ playing: true, position: 0 });
     }
   };
 
   const handlePrevTrack = () => {
-    if (!isHost) return;
     if (currentTrackIndex > 0) {
       setCurrentTrackIndex(currentTrackIndex - 1);
+      setPlaybackState({ playing: true, position: 0 });
     }
   };
 
-  // Add track to playlist
-  const handleAddTrack = (spotifyId: string) => {
-    // In production, this would search Spotify and add track
+  // Auto-advance feature can be added here in production
+  // with proper WebSocket/real-time sync
+
+  // Add track from Spotify search
+  const handleAddTrack = (spotifyTrack: {
+    id: string;
+    name: string;
+    artist: string;
+    album: string;
+    image: string;
+    duration: number;
+  }) => {
     const newTrack: Track = {
       id: Date.now().toString(),
-      name: "New Track",
-      artist: "Artist Name",
-      spotifyId,
+      name: spotifyTrack.name,
+      artist: spotifyTrack.artist,
+      album: spotifyTrack.album,
+      image: spotifyTrack.image,
+      spotifyId: spotifyTrack.id,
       addedBy: "You",
       addedByAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=You",
-      votes: 0
+      votes: 0,
+      duration: spotifyTrack.duration
     };
+    
     setPlaylist([...playlist, newTrack]);
+    
+    // Add system message
+    const systemMessage: Message = {
+      id: Date.now().toString(),
+      user: "System",
+      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=System",
+      text: `You added "${newTrack.name}" by ${newTrack.artist} to the playlist`,
+      timestamp: new Date()
+    };
+    setMessages([...messages, systemMessage]);
   };
 
   // Vote for track
@@ -137,8 +177,6 @@ export default function ListeningPartyRoom() {
     setMessages([...messages, message]);
     setNewMessage("");
   };
-
-  const currentTrack = playlist[currentTrackIndex];
 
   // Verification Gate
   if (!isVerified) {
@@ -191,22 +229,37 @@ export default function ListeningPartyRoom() {
           <div className="bg-gradient-to-b from-purple-900/20 to-transparent p-6">
             {currentTrack && (
               <>
-                {/* Spotify Embed */}
-                <div ref={spotifyEmbedRef} className="mb-6">
-                  <iframe
-                    src={`https://open.spotify.com/embed/track/${currentTrack.spotifyId}?utm_source=generator&theme=0`}
-                    width="100%"
-                    height="152"
-                    frameBorder="0"
-                    allowFullScreen
-                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                    loading="lazy"
-                  />
+                {/* Track Info */}
+                <div className="flex items-center gap-4 mb-6">
+                  {currentTrack.image && (
+                    <Image
+                      src={currentTrack.image}
+                      alt={currentTrack.album || currentTrack.name}
+                      width={80}
+                      height={80}
+                      className="rounded-lg"
+                    />
+                  )}
+                  <div className="flex-1">
+                    <h2 className="text-2xl font-bold">{currentTrack.name}</h2>
+                    <p className="text-gray-400">{currentTrack.artist}</p>
+                    {currentTrack.album && (
+                      <p className="text-sm text-gray-500">{currentTrack.album}</p>
+                    )}
+                  </div>
                 </div>
 
-                {/* Host Controls */}
+                {/* Spotify Player with iFrame API */}
+                <SpotifyPlayer
+                  trackId={currentTrack.spotifyId}
+                  isHost={isHost}
+                  onPlaybackChange={handlePlaybackChange}
+                  syncState={!isHost ? playbackState : undefined}
+                />
+
+                {/* Navigation Controls for Host */}
                 {isHost && (
-                  <div className="flex justify-center gap-4 mb-6">
+                  <div className="flex justify-center gap-4 mt-4">
                     <button
                       onClick={handlePrevTrack}
                       className="p-3 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors"
@@ -215,20 +268,6 @@ export default function ListeningPartyRoom() {
                       <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
                       </svg>
-                    </button>
-                    <button
-                      onClick={handlePlayPause}
-                      className="p-4 rounded-full bg-purple-600 hover:bg-purple-700 transition-colors"
-                    >
-                      {isPlaying ? (
-                        <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M6 4h4v16H6zM14 4h4v16h-4z"/>
-                        </svg>
-                      ) : (
-                        <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M8 5v14l11-7z"/>
-                        </svg>
-                      )}
                     </button>
                     <button
                       onClick={handleNextTrack}
@@ -242,7 +281,7 @@ export default function ListeningPartyRoom() {
                   </div>
                 )}
 
-                <div className="text-center">
+                <div className="text-center mt-4">
                   <p className="text-sm text-gray-400">Added by {currentTrack.addedBy}</p>
                 </div>
               </>
@@ -253,23 +292,9 @@ export default function ListeningPartyRoom() {
           <div className="flex-1 overflow-y-auto p-6">
             <h2 className="text-xl font-bold mb-4">Collaborative Playlist</h2>
             
-            {/* Add Track */}
+            {/* Add Track with Spotify Search */}
             <div className="mb-6">
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Search for a song to add..."
-                  className="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 focus:border-purple-500 focus:outline-none"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <button
-                  onClick={() => handleAddTrack("demo")}
-                  className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg font-medium transition-colors"
-                >
-                  Add Song
-                </button>
-              </div>
+              <SpotifySearch onAddTrack={handleAddTrack} />
             </div>
 
             {/* Track List */}
@@ -286,6 +311,15 @@ export default function ListeningPartyRoom() {
                   <div className="text-gray-400 w-8 text-center">
                     {index + 1}
                   </div>
+                  {track.image && (
+                    <Image
+                      src={track.image}
+                      alt={track.album || track.name}
+                      width={40}
+                      height={40}
+                      className="rounded"
+                    />
+                  )}
                   <Image
                     src={track.addedByAvatar}
                     alt={track.addedBy}

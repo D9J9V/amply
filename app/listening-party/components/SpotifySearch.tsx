@@ -10,6 +10,8 @@ interface Track {
   album: string;
   image: string;
   duration: number;
+  uri?: string;
+  preview_url?: string | null;
 }
 
 interface SpotifySearchProps {
@@ -20,45 +22,64 @@ export default function SpotifySearch({ onAddTrack }: SpotifySearchProps) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Track[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock search function - in production, this would call your API
   const searchTracks = async () => {
     if (!query.trim()) return;
 
     setIsSearching(true);
+    setError(null);
 
-    // Mock results - replace with actual Spotify API call
-    setTimeout(() => {
-      const mockResults: Track[] = [
-        {
-          id: "3n3Ppam7vgaVa1iaRUc9Lp",
-          name: "Mr. Brightside",
-          artist: "The Killers",
-          album: "Hot Fuss",
-          image: "https://i.scdn.co/image/ab67616d0000b2736c619c39c853f8b1d67b7859",
-          duration: 222000
-        },
-        {
-          id: "7qiZfU4dY1lWllzX7mPBI3",
-          name: "Shape of You",
-          artist: "Ed Sheeran",
-          album: "÷ (Deluxe)",
-          image: "https://i.scdn.co/image/ab67616d0000b273ba5db46f4b838ef6027e6f96",
-          duration: 233000
-        },
-        {
-          id: "4VqPOruhp5EdPBeR92t6lQ",
-          name: "Uprising",
-          artist: "Muse",
-          album: "The Resistance",
-          image: "https://i.scdn.co/image/ab67616d0000b2738cb690f962092fd44bbe2bf4",
-          duration: 304000
+    try {
+      const response = await fetch(`/api/spotify/search?q=${encodeURIComponent(query)}&limit=5`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        // If Spotify API is not configured, show mock data with a notice
+        if (response.status === 503) {
+          setError("Spotify API not configured. Showing demo results.");
+          
+          // Show mock results for demo purposes
+          const mockResults: Track[] = [
+            {
+              id: "3n3Ppam7vgaVa1iaRUc9Lp",
+              name: "Mr. Brightside",
+              artist: "The Killers",
+              album: "Hot Fuss",
+              image: "https://i.scdn.co/image/ab67616d0000b2736c619c39c853f8b1d67b7859",
+              duration: 222000
+            },
+            {
+              id: "7qiZfU4dY1lWllzX7mPBI3",
+              name: "Shape of You",
+              artist: "Ed Sheeran",
+              album: "÷ (Deluxe)",
+              image: "https://i.scdn.co/image/ab67616d0000b273ba5db46f4b838ef6027e6f96",
+              duration: 233000
+            },
+            {
+              id: "4VqPOruhp5EdPBeR92t6lQ",
+              name: "Uprising",
+              artist: "Muse",
+              album: "The Resistance",
+              image: "https://i.scdn.co/image/ab67616d0000b2738cb690f962092fd44bbe2bf4",
+              duration: 304000
+            }
+          ];
+          setResults(mockResults);
+        } else {
+          throw new Error(data.error || 'Search failed');
         }
-      ];
-
-      setResults(mockResults);
+      } else {
+        setResults(data.tracks || []);
+      }
+    } catch (err) {
+      console.error('Search error:', err);
+      setError('Failed to search tracks. Please try again.');
+      setResults([]);
+    } finally {
       setIsSearching(false);
-    }, 500);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -91,6 +112,22 @@ export default function SpotifySearch({ onAddTrack }: SpotifySearchProps) {
         </button>
       </form>
 
+      {error && (
+        <div className="bg-yellow-900/20 border border-yellow-600 rounded-lg p-3 text-sm text-yellow-400">
+          {error}
+          {error.includes('not configured') && (
+            <div className="mt-2 text-xs">
+              To enable real Spotify search:
+              <ol className="list-decimal list-inside mt-1">
+                <li>Create a Spotify app at developer.spotify.com</li>
+                <li>Copy your Client ID and Client Secret</li>
+                <li>Add them to your .env.local file</li>
+              </ol>
+            </div>
+          )}
+        </div>
+      )}
+
       {results.length > 0 && (
         <div className="bg-gray-900 rounded-lg p-4 space-y-2 max-h-64 overflow-y-auto">
           {results.map((track) => (
@@ -98,13 +135,15 @@ export default function SpotifySearch({ onAddTrack }: SpotifySearchProps) {
               key={track.id}
               className="flex items-center gap-3 p-2 hover:bg-gray-800 rounded-lg transition-colors"
             >
-              <Image
-                src={track.image}
-                alt={track.album}
-                width={48}
-                height={48}
-                className="rounded"
-              />
+              {track.image && (
+                <Image
+                  src={track.image}
+                  alt={track.album}
+                  width={48}
+                  height={48}
+                  className="rounded"
+                />
+              )}
               <div className="flex-1 min-w-0">
                 <p className="font-medium truncate">{track.name}</p>
                 <p className="text-sm text-gray-400 truncate">
