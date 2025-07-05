@@ -164,3 +164,4 @@ When implementing features, consult these documentation resources:
 - **Storage**: When implementing features related to decentralized storage, file handling, or data persistence, be sure to read `/docs/walrus`
   - **Implementation Guide**: For specific Walrus API integration examples and code snippets, see `/docs/WALRUS_IMPLEMENTATION_GUIDE.md`
 - **Hardware Wallet Integration**: When implementing features related to Ledger hardware wallet integration, NFT custody, or secure transaction signing, be sure to read `/docs/ledger-live-wiki`
+  - **Clear Signing (ERC-7730)**: For implementing transparent transaction signing and creating human-readable transaction displays, see `/docs/ERC7730_CLEAR_SIGNING_GUIDE.md`

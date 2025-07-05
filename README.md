@@ -31,7 +31,7 @@ Amply is a robust and decentralized Web3 application designed to create a fair a
 
 * **Human Identity Verification (World ID)**: Amply integrates the **World ID SDK** to allow users to privately verify their humanity using Zero-Knowledge Proofs (ZKPs). This is a foundational feature for "quantifying real impressions," ensuring that content access, tips, and other interactions originate from unique, genuine users, effectively preventing bot fraud.
 
-* **Master Ownership (NFTs & Ledger)**: Master NFTs are custom **ERC-721 contracts** deployed on Worldchain. These NFTs contain metadata that links to the original content. Amply demonstrates how artists can connect their **Ledger hardware wallets** via WalletConnect (or similar) to securely self-custody these master NFTs, emphasizing true artist control over their work.
+* **Master Ownership (NFTs & Ledger)**: Master NFTs are custom **ERC-721 contracts** deployed on Worldchain. These NFTs contain metadata that links to the original content. Amply demonstrates how artists can connect their **Ledger hardware wallets** via WalletConnect (or similar) to securely self-custody these master NFTs, emphasizing true artist control over their work. All transactions implement **ERC-7730 Clear Signing** for transparent, human-readable transaction approval. See `/docs/ERC7730_CLEAR_SIGNING_GUIDE.md` for implementation details.
 
 * **Decentralized Content Storage (Walrus.xyz)**: All audio and video files, along with associated content, are uploaded and stored using **Walrus.xyz**. This platform provides a robust, decentralized storage solution, ensuring content is permanent, always available, and censorship-resistant, without relying on central servers. The Content ID (CID) of each file from Walrus.xyz is obtained and stored within the NFT's metadata on the blockchain, ensuring content immutability and accessibility from a distributed network. See `/docs/WALRUS_IMPLEMENTATION_GUIDE.md` for specific API integration examples.
 
@@ -80,7 +80,7 @@ pnpm start
 - **Blockchain**: World chain network
 - **Identity**: World ID SDK
 - **Storage**: Walrus decentralized storage
-- **Hardware Wallet**: Ledger integration for secure NFT custody
+- **Hardware Wallet**: Ledger integration for secure NFT custody with ERC-7730 Clear Signing
 - **Deployment**: Vercel
 
 ## Application Routes
