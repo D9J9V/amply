@@ -102,12 +102,20 @@ export default function ListeningPartyPage() {
                 Create an exclusive listening experience for your fans
               </p>
             </div>
-            <Link
-              href="/listening-party/create"
-              className="bg-white text-black px-6 py-3 rounded-full font-semibold hover:bg-gray-100 transition-colors"
-            >
-              Create Party
-            </Link>
+            <div className="flex gap-3">
+              <Link
+                href="/listening-party/create"
+                className="bg-white text-black px-6 py-3 rounded-full font-semibold hover:bg-gray-100 transition-colors"
+              >
+                Create Party
+              </Link>
+              <Link
+                href="/listening-party/create-live"
+                className="bg-purple-800 text-white px-6 py-3 rounded-full font-semibold hover:bg-purple-700 transition-colors border border-purple-600"
+              >
+                Go Live Now
+              </Link>
+            </div>
           </div>
         </div>
 
