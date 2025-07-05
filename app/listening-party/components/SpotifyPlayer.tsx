@@ -9,33 +9,28 @@ interface SpotifyPlayerProps {
   syncState?: { playing: boolean; position: number };
 }
 
-interface SpotifyIFrameAPI {
-  createController: (
-    element: HTMLElement,
-    options: { uri: string; width: string; height: string },
-    callback: (controller: SpotifyController) => void
-  ) => void;
-}
-
-interface SpotifyController {
-  addListener: (event: string, callback: (data: PlaybackUpdateEvent | Record<string, unknown>) => void) => void;
+interface EmbedController {
   play: () => void;
   pause: () => void;
-  togglePlay: () => void;
   seek: (position: number) => void;
-  destroy: () => void;
+  addListener: (event: string, callback: (data: PlaybackState) => void) => void;
+  removeListener: (event: string, callback: (data: PlaybackState) => void) => void;
+  destroy?: () => void;
 }
 
-interface PlaybackUpdateEvent {
-  data: {
-    isPaused: boolean;
-    position: number;
-  };
+interface PlaybackState {
+  isPaused: boolean;
+  position: number;
+  duration: number;
+}
+
+interface IFrameAPI {
+  createController: (element: HTMLElement, options: object, callback: (controller: EmbedController) => void) => void;
 }
 
 declare global {
   interface Window {
-    onSpotifyIframeApiReady: (IFrameAPI: SpotifyIFrameAPI) => void;
+    onSpotifyIframeApiReady: (IFrameAPI: unknown) => void;
   }
 }
 
@@ -45,7 +40,7 @@ export default function SpotifyPlayer({
   onPlaybackChange,
   syncState 
 }: SpotifyPlayerProps) {
-  const embedController = useRef<SpotifyController | null>(null);
+  const embedController = useRef<EmbedController | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentPosition, setCurrentPosition] = useState(0);
@@ -57,17 +52,18 @@ export default function SpotifyPlayer({
     script.src = 'https://open.spotify.com/embed/iframe-api/v1';
     script.async = true;
 
-    window.onSpotifyIframeApiReady = (IFrameAPI: SpotifyIFrameAPI) => {
+    window.onSpotifyIframeApiReady = (IFrameAPI) => {
       const element = playerRef.current;
       if (!element) return;
 
+      const api = IFrameAPI as IFrameAPI;
       const options = {
         uri: `spotify:track:${trackId}`,
         width: '100%',
         height: '152',
       };
 
-      const callback = (controller: SpotifyController) => {
+      const callback = (controller: EmbedController) => {
         embedController.current = controller;
         setIsReady(true);
 
@@ -76,27 +72,24 @@ export default function SpotifyPlayer({
           console.log('Spotify player ready');
         });
 
-        controller.addListener('playback_update', (e) => {
-          if ('data' in e && typeof e.data === 'object' && e.data !== null && 'isPaused' in e.data && 'position' in e.data) {
-            const event = e as PlaybackUpdateEvent;
-            setIsPlaying(!event.data.isPaused);
-            setCurrentPosition(event.data.position);
-            
-            if (isHost && onPlaybackChange) {
-              onPlaybackChange(!event.data.isPaused, event.data.position);
-            }
+        controller.addListener('playback_update', (data: PlaybackState) => {
+          setIsPlaying(!data.isPaused);
+          setCurrentPosition(data.position);
+          
+          if (isHost && onPlaybackChange) {
+            onPlaybackChange(!data.isPaused, data.position);
           }
         });
       };
 
-      IFrameAPI.createController(element, options, callback);
+      api.createController(element, options, callback);
     };
 
     document.body.appendChild(script);
 
     return () => {
       // Cleanup
-      if (embedController.current) {
+      if (embedController.current && embedController.current.destroy) {
         embedController.current.destroy();
       }
       document.body.removeChild(script);
@@ -122,14 +115,12 @@ export default function SpotifyPlayer({
   const handlePlayPause = () => {
     if (!embedController.current || !isHost) return;
 
-    embedController.current.togglePlay();
+    if (isPlaying) {
+      embedController.current.pause();
+    } else {
+      embedController.current.play();
+    }
   };
-
-  // Seek functionality can be added in the future
-  // const handleSeek = (position: number) => {
-  //   if (!embedController.current || !isHost) return;
-  //   embedController.current.seek(position);
-  // };
 
   return (
     <div className="space-y-4">
