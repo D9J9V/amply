@@ -115,7 +115,11 @@ export default function SpotifyPlayer({
   const handlePlayPause = () => {
     if (!embedController.current || !isHost) return;
 
-    embedController.current.togglePlay();
+    if (isPlaying) {
+      embedController.current.pause();
+    } else {
+      embedController.current.play();
+    }
   };
 
 
