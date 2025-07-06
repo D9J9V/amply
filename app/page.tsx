@@ -38,12 +38,14 @@ export default function HomePage() {
   const [isConnected, setIsConnected] = useState(false)
   const [currentPlaying, setCurrentPlaying] = useState<number | null>(null)
   const [likedItems, setLikedItems] = useState<number[]>([])
-  const [isMuted, setIsMuted] = useState(false)
+  const [isMuted, setIsMuted] = useState(true)
   const [visibleItems, setVisibleItems] = useState(10)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [activeTab, setActiveTab] = useState("for-you")
   const containerRef = useRef<HTMLDivElement>(null)
   const observerRef = useRef<HTMLDivElement>(null)
+  const videoRefs = useRef<{ [key: number]: HTMLVideoElement | null }>({})
+  const audioRefs = useRef<{ [key: number]: HTMLAudioElement | null }>({})
 
   // Show onboarding modal on first load
   useEffect(() => {
@@ -92,12 +94,71 @@ export default function HomePage() {
     }
   }, [])
 
+  // Stop all audio when changing tabs
+  useEffect(() => {
+    Object.values(audioRefs.current).forEach(audio => {
+      if (audio && !audio.paused) {
+        audio.pause();
+      }
+    });
+    setCurrentPlaying(null);
+  }, [activeTab])
+
+  // Cleanup audio on unmount
+  useEffect(() => {
+    const currentAudioRefs = audioRefs.current;
+    return () => {
+      Object.values(currentAudioRefs).forEach(audio => {
+        if (audio && !audio.paused) {
+          audio.pause();
+        }
+      });
+    };
+  }, [])
+
   const handleLike = (itemId: number) => {
     setLikedItems((prev) => (prev.includes(itemId) ? prev.filter((id) => id !== itemId) : [...prev, itemId]))
   }
 
-  const handlePlay = (itemId: number) => {
-    setCurrentPlaying(currentPlaying === itemId ? null : itemId)
+  const handlePlay = async (itemId: number) => {
+    // If clicking the same item, toggle play/pause
+    if (currentPlaying === itemId) {
+      const audio = audioRefs.current[itemId];
+      const video = videoRefs.current[itemId];
+      
+      if (audio && audio.paused) {
+        await audio.play();
+        if (video) video.play();
+      } else if (audio) {
+        audio.pause();
+        if (video) video.pause();
+      }
+      
+      setCurrentPlaying(audio?.paused ? null : itemId);
+    } else {
+      // Stop all other audio
+      Object.entries(audioRefs.current).forEach(([id, audio]) => {
+        if (audio && !audio.paused) {
+          audio.pause();
+          const video = videoRefs.current[parseInt(id)];
+          if (video) video.pause();
+        }
+      });
+      
+      // Play the selected item
+      const audio = audioRefs.current[itemId];
+      const video = videoRefs.current[itemId];
+      
+      if (audio) {
+        try {
+          await audio.play();
+          if (video) video.play();
+          setCurrentPlaying(itemId);
+        } catch (error) {
+          console.error('Error playing audio:', error);
+        }
+      }
+    }
   }
 
   const handleWorldIdConnect = () => {
@@ -109,6 +170,21 @@ export default function HomePage() {
   const handleWorldIdSkip = () => {
     localStorage.setItem("amply-onboarding-seen", "true")
     console.log("User skipped World ID verification")
+  }
+
+  const toggleMute = () => {
+    const newMutedState = !isMuted;
+    setIsMuted(newMutedState);
+    
+    // Update all audio elements
+    Object.values(audioRefs.current).forEach(audio => {
+      if (audio) audio.muted = newMutedState;
+    });
+    
+    // Update all video elements
+    Object.values(videoRefs.current).forEach(video => {
+      if (video) video.muted = true; // Keep videos always muted
+    });
   }
 
   const scrollToNext = () => {
@@ -131,6 +207,46 @@ export default function HomePage() {
     }
   }
 
+  // Define feed item types
+  interface BaseFeedItem {
+    id: number;
+    type: 'music' | 'drop' | 'live';
+    title: string;
+    artist: string;
+    image: string;
+    verified: boolean;
+    description: string;
+    category: string;
+    humanVerified: boolean;
+    videoUrl?: string;
+  }
+
+  interface MusicItem extends BaseFeedItem {
+    type: 'music';
+    duration: string;
+    plays: number;
+    likes: number;
+    price: string;
+  }
+
+  interface DropItem extends BaseFeedItem {
+    type: 'drop';
+    timeLeft: string;
+    price: string;
+    rarity: string;
+    listeners: number;
+    benefits: string[];
+  }
+
+  interface LiveItem extends BaseFeedItem {
+    type: 'live';
+    viewers: number;
+    startedAt: string;
+    features: string[];
+  }
+
+  type FeedItem = MusicItem | DropItem | LiveItem;
+
   // Walrus video URLs from decentralized storage
   const walrusVideos = {
     teamm: "https://aggregator.walrus-testnet.walrus.space/v1/blobs/q8nmCpd3cXi96NdvSHODarSLDah_fHmC1nHrNzwau8c",
@@ -139,7 +255,7 @@ export default function HomePage() {
   }
 
   // Feed items - mix of music, drops, and live events
-  const allFeedItems = [
+  const allFeedItems: FeedItem[] = [
     {
       id: 1,
       type: "music",
@@ -312,7 +428,7 @@ export default function HomePage() {
               <Button
                 size="sm"
                 variant="ghost"
-                onClick={() => setIsMuted(!isMuted)}
+                onClick={toggleMute}
                 className="text-gray-500 hover:text-amply-orange hover:bg-gray-50 rounded-2xl p-2 sm:p-3 touch-target"
               >
                 {isMuted ? (
@@ -450,16 +566,26 @@ export default function HomePage() {
             >
               {/* Background Image/Video */}
               <div className="absolute inset-0">
-                {(item as any).videoUrl ? (
-                  <video
-                    src={(item as any).videoUrl}
-                    className="w-full h-full object-cover"
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    poster={item.image}
-                  />
+                {'videoUrl' in item && item.videoUrl ? (
+                  <>
+                    <video
+                      ref={(el) => { videoRefs.current[item.id] = el }}
+                      src={item.videoUrl}
+                      className="w-full h-full object-cover"
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      poster={item.image}
+                    />
+                    {/* Separate audio element for better control */}
+                    <audio
+                      ref={(el) => { audioRefs.current[item.id] = el }}
+                      src={item.videoUrl}
+                      loop
+                      muted={isMuted}
+                    />
+                  </>
                 ) : (
                   <img src={item.image || "/placeholder.svg"} alt={item.title} className="w-full h-full object-cover" />
                 )}
