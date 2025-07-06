@@ -2,13 +2,12 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Music, Upload, Zap, Users, TrendingUp, DollarSign, Play, Heart } from "lucide-react"
 import Link from "next/link"
 import WorldIdBadge from "@/components/world-id-badge"
+import UploadSection from "./upload-section"
 
 export default function ArtistPage() {
   const [activeTab, setActiveTab] = useState("overview")
@@ -195,57 +194,7 @@ export default function ArtistPage() {
 
           {/* Upload Tab */}
           <TabsContent value="upload" className="space-y-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Upload Music */}
-              <Card className="bg-amply-white border-0 shadow-card rounded-3xl">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-amply-black">
-                    <Music className="w-5 h-5 mr-2" />
-                    Upload Music
-                  </CardTitle>
-                  <CardDescription>Share your latest tracks with the world</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center">
-                    <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600 mb-2">Drag and drop your audio file here</p>
-                    <p className="text-sm text-gray-500">MP3, WAV, FLAC up to 100MB</p>
-                    <Button className="amply-button-outline mt-4">Choose File</Button>
-                  </div>
-                  <div className="space-y-4">
-                    <Input placeholder="Track Title" className="rounded-2xl" />
-                    <Textarea placeholder="Description" className="rounded-2xl" />
-                    <Input placeholder="Genre" className="rounded-2xl" />
-                  </div>
-                  <Button className="amply-button-primary w-full py-3 rounded-2xl">Upload Track</Button>
-                </CardContent>
-              </Card>
-
-              {/* Create NFT Drop */}
-              <Card className="bg-amply-white border-0 shadow-card rounded-3xl">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-amply-black">
-                    <Zap className="w-5 h-5 mr-2" />
-                    Create NFT Drop
-                  </CardTitle>
-                  <CardDescription>Launch exclusive content for your fans</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center">
-                    <Zap className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600 mb-2">Upload artwork and exclusive content</p>
-                    <p className="text-sm text-gray-500">JPG, PNG, GIF up to 50MB</p>
-                    <Button className="amply-button-outline mt-4">Choose Files</Button>
-                  </div>
-                  <div className="space-y-4">
-                    <Input placeholder="Drop Title" className="rounded-2xl" />
-                    <Input placeholder="Price (WLD)" className="rounded-2xl" />
-                    <Input placeholder="Limited Edition (quantity)" className="rounded-2xl" />
-                  </div>
-                  <Button className="amply-button-secondary w-full py-3 rounded-2xl">Create Drop</Button>
-                </CardContent>
-              </Card>
-            </div>
+            <UploadSection />
           </TabsContent>
 
           {/* Analytics Tab */}
