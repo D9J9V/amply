@@ -52,8 +52,7 @@ export default function LiveListeningParty() {
     remoteVideoRef,
     toggleAudio,
     toggleVideo,
-    getMediaStates,
-    playVideo
+    getMediaStates
   } = useWebRTC({
     partyId,
     userId: currentUser?.id || '',
@@ -361,12 +360,25 @@ export default function LiveListeningParty() {
               ) : (
                 <>
                   {remoteStream ? (
-                    <div className="relative w-full h-full">
+                    <div 
+                      className="relative w-full h-full"
+                      onClick={async () => {
+                        if (autoplayBlocked && !playbackStarted && remoteVideoRef.current) {
+                          console.log('[Listening Party] Container clicked - attempting play');
+                          try {
+                            await remoteVideoRef.current.play();
+                          } catch (err) {
+                            console.error('[Listening Party] Container click play failed:', err);
+                          }
+                        }
+                      }}
+                    >
                       <video
                         ref={remoteVideoRef}
                         autoPlay
                         muted={false}
                         playsInline
+                        controls={false}
                         className="w-full h-full object-cover"
                         onLoadedMetadata={() => {
                           console.log('[Listening Party] Video metadata loaded');
@@ -374,26 +386,75 @@ export default function LiveListeningParty() {
                         onCanPlay={() => {
                           console.log('[Listening Party] Video can play');
                         }}
+                        onPlay={() => {
+                          console.log('[Listening Party] Video started playing');
+                          setPlaybackStarted(true);
+                        }}
+                        onPause={() => {
+                          console.log('[Listening Party] Video paused');
+                        }}
+                        onError={(e) => {
+                          console.error('[Listening Party] Video error:', e);
+                        }}
                       />
                       {autoplayBlocked && !playbackStarted && (
                         <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                           <button
-                            onClick={async () => {
+                            onClick={async (e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
                               console.log('[Listening Party] Play button clicked');
+                              
                               try {
-                                if (remoteVideoRef.current) {
+                                if (remoteVideoRef.current && remoteStream) {
+                                  console.log('[Listening Party] Video element state:', {
+                                    readyState: remoteVideoRef.current.readyState,
+                                    paused: remoteVideoRef.current.paused,
+                                    srcObject: !!remoteVideoRef.current.srcObject,
+                                    currentTime: remoteVideoRef.current.currentTime,
+                                    duration: remoteVideoRef.current.duration
+                                  });
+                                  
+                                  // Ensure stream is attached
+                                  if (!remoteVideoRef.current.srcObject) {
+                                    console.log('[Listening Party] Attaching stream to video element');
+                                    remoteVideoRef.current.srcObject = remoteStream;
+                                  }
+                                  
+                                  // Wait for video to be ready if needed
+                                  if (remoteVideoRef.current.readyState < 2) {
+                                    console.log('[Listening Party] Waiting for video to be ready...');
+                                    await new Promise((resolve) => {
+                                      remoteVideoRef.current!.addEventListener('loadeddata', resolve, { once: true });
+                                    });
+                                  }
+                                  
                                   console.log('[Listening Party] Direct play attempt');
-                                  await remoteVideoRef.current.play();
-                                  console.log('[Listening Party] Play successful');
-                                  setPlaybackStarted(true);
+                                  const playPromise = remoteVideoRef.current.play();
+                                  
+                                  if (playPromise !== undefined) {
+                                    await playPromise;
+                                    console.log('[Listening Party] Play successful');
+                                    setPlaybackStarted(true);
+                                  }
                                 } else {
-                                  console.error('[Listening Party] No video ref available');
+                                  console.error('[Listening Party] Missing video ref or stream');
                                 }
                               } catch (err) {
-                                console.error('[Listening Party] Direct play failed:', err);
-                                // Fallback to playVideo function
-                                await playVideo();
-                                setPlaybackStarted(true);
+                                console.error('[Listening Party] Play failed:', err);
+                                // Try unmuting and playing
+                                if (remoteVideoRef.current) {
+                                  try {
+                                    console.log('[Listening Party] Trying muted play as fallback');
+                                    remoteVideoRef.current.muted = true;
+                                    await remoteVideoRef.current.play();
+                                    // Unmute after play starts
+                                    remoteVideoRef.current.muted = false;
+                                    setPlaybackStarted(true);
+                                  } catch (mutedErr) {
+                                    console.error('[Listening Party] Muted play also failed:', mutedErr);
+                                  }
+                                }
                               }
                             }}
                             className="bg-purple-600 hover:bg-purple-700 px-8 py-4 rounded-full font-semibold transition-all transform hover:scale-105 flex items-center gap-3"
