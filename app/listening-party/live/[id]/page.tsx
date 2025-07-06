@@ -363,6 +363,11 @@ export default function LiveListeningParty() {
                     <div 
                       className="relative w-full h-full"
                       onClick={async () => {
+                        console.log('[Listening Party] Container clicked', {
+                          autoplayBlocked,
+                          playbackStarted,
+                          hasVideoRef: !!remoteVideoRef.current
+                        });
                         if (autoplayBlocked && !playbackStarted && remoteVideoRef.current) {
                           console.log('[Listening Party] Container clicked - attempting play');
                           try {
@@ -397,7 +402,14 @@ export default function LiveListeningParty() {
                           console.error('[Listening Party] Video error:', e);
                         }}
                       />
-                      {autoplayBlocked && !playbackStarted && (
+                      {(() => {
+                        console.log('[Listening Party] Play button render check:', {
+                          autoplayBlocked,
+                          playbackStarted,
+                          shouldShowButton: autoplayBlocked && !playbackStarted
+                        });
+                        return autoplayBlocked && !playbackStarted;
+                      })() && (
                         <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                           <button
                             onClick={async (e) => {

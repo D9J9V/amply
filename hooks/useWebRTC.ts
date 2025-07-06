@@ -222,14 +222,25 @@ export function useWebRTC({ partyId, userId, isHost, enabled = true }: UseWebRTC
 
   // Update remote video element when remote stream changes
   useEffect(() => {
+    console.log('[WebRTC Hook] remoteStream effect triggered', {
+      hasRemoteStream: !!remoteStream,
+      hasVideoRef: !!remoteVideoRef.current,
+      autoplayBlocked
+    });
+    
     if (remoteVideoRef.current && remoteStream) {
       console.log('[WebRTC Hook] Setting remote stream on video element in effect');
       remoteVideoRef.current.srcObject = remoteStream;
       // Ensure video plays
-      remoteVideoRef.current.play().catch(err => {
-        console.error('[WebRTC Hook] Video play failed in effect:', err);
-        setAutoplayBlocked(true);
-      });
+      remoteVideoRef.current.play()
+        .then(() => {
+          console.log('[WebRTC Hook] Video play succeeded in effect');
+          setAutoplayBlocked(false);
+        })
+        .catch(err => {
+          console.error('[WebRTC Hook] Video play failed in effect:', err);
+          setAutoplayBlocked(true);
+        });
     }
   }, [remoteStream]);
 
