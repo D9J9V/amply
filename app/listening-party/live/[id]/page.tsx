@@ -38,6 +38,7 @@ export default function LiveListeningParty() {
   const [newMessage, setNewMessage] = useState("");
   const [isHost, setIsHost] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [playbackStarted, setPlaybackStarted] = useState(false);
   
   // WebRTC hook
   const {
@@ -367,11 +368,34 @@ export default function LiveListeningParty() {
                         muted={false}
                         playsInline
                         className="w-full h-full object-cover"
+                        onLoadedMetadata={() => {
+                          console.log('[Listening Party] Video metadata loaded');
+                        }}
+                        onCanPlay={() => {
+                          console.log('[Listening Party] Video can play');
+                        }}
                       />
-                      {autoplayBlocked && (
+                      {autoplayBlocked && !playbackStarted && (
                         <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                           <button
-                            onClick={playVideo}
+                            onClick={async () => {
+                              console.log('[Listening Party] Play button clicked');
+                              try {
+                                if (remoteVideoRef.current) {
+                                  console.log('[Listening Party] Direct play attempt');
+                                  await remoteVideoRef.current.play();
+                                  console.log('[Listening Party] Play successful');
+                                  setPlaybackStarted(true);
+                                } else {
+                                  console.error('[Listening Party] No video ref available');
+                                }
+                              } catch (err) {
+                                console.error('[Listening Party] Direct play failed:', err);
+                                // Fallback to playVideo function
+                                await playVideo();
+                                setPlaybackStarted(true);
+                              }
+                            }}
                             className="bg-purple-600 hover:bg-purple-700 px-8 py-4 rounded-full font-semibold transition-all transform hover:scale-105 flex items-center gap-3"
                           >
                             <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">

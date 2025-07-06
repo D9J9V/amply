@@ -153,14 +153,28 @@ export function useWebRTC({ partyId, userId, isHost, enabled = true }: UseWebRTC
 
   // Manually start playback (for when autoplay is blocked)
   const playVideo = useCallback(async () => {
+    console.log('[WebRTC Hook] playVideo called', {
+      hasVideoRef: !!remoteVideoRef.current,
+      hasStream: !!remoteStream,
+      videoSrc: remoteVideoRef.current?.srcObject
+    });
+    
     if (remoteVideoRef.current && remoteStream) {
       try {
+        // Ensure the stream is set on the video element
+        if (remoteVideoRef.current.srcObject !== remoteStream) {
+          console.log('[WebRTC Hook] Setting stream on video element before play');
+          remoteVideoRef.current.srcObject = remoteStream;
+        }
+        
         await remoteVideoRef.current.play();
         setAutoplayBlocked(false);
         console.log('[WebRTC Hook] Video playback started manually');
       } catch (err) {
         console.error('[WebRTC Hook] Manual play failed:', err);
       }
+    } else {
+      console.error('[WebRTC Hook] Cannot play - missing video ref or stream');
     }
   }, [remoteStream]);
 
