@@ -27,6 +27,12 @@ export default function TestHome() {
       description: "Test Supabase realtime, WebRTC, and synchronized playback",
       href: "/test/listening-party",
       icon: "🎵"
+    },
+    {
+      title: "WebRTC Direct Test",
+      description: "Debug WebRTC peer-to-peer video streaming",
+      href: "/test/webrtc",
+      icon: "📹"
     }
   ];
 

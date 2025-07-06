@@ -15,6 +15,8 @@ export class WebRTCSignaling {
   private peers: Map<string, SimplePeer.Instance> = new Map();
   private stream: MediaStream | null = null;
   private signalChannel: ReturnType<typeof supabase.channel> | null = null;
+  private connectionAttempts: Map<string, number> = new Map();
+  private isReconnecting: boolean = false;
   
   constructor(partyId: string, userId: string, isHost: boolean) {
     this.partyId = partyId;
@@ -51,14 +53,27 @@ export class WebRTCSignaling {
   }
 
   private async connectToHost() {
-    // Check if we already have a connection
+    // Check if we already have a connection or are reconnecting
     const existingPeer = this.peers.get('host');
     if (existingPeer && !existingPeer.destroyed) {
       console.log('[WebRTC] Already connected to host');
       return;
     }
 
-    console.log('[WebRTC] Participant connecting to host...');
+    if (this.isReconnecting) {
+      console.log('[WebRTC] Already attempting to reconnect');
+      return;
+    }
+
+    // Track connection attempts
+    const attempts = this.connectionAttempts.get('host') || 0;
+    if (attempts >= 5) {
+      console.error('[WebRTC] Max connection attempts reached');
+      return;
+    }
+    this.connectionAttempts.set('host', attempts + 1);
+
+    console.log('[WebRTC] Participant connecting to host... (attempt', attempts + 1, ')');
     const peer = new SimplePeer({
       initiator: true,
       trickle: true,
@@ -87,12 +102,48 @@ export class WebRTCSignaling {
     });
 
     peer.on('stream', (stream) => {
-      console.log('[WebRTC] Received stream from host');
+      console.log('[WebRTC] Received stream from host:', {
+        id: stream.id,
+        active: stream.active,
+        videoTracks: stream.getVideoTracks().length,
+        audioTracks: stream.getAudioTracks().length,
+        videoEnabled: stream.getVideoTracks()[0]?.enabled,
+        audioEnabled: stream.getAudioTracks()[0]?.enabled
+      });
       this.onRemoteStream('host', stream);
     });
 
     peer.on('connect', () => {
       console.log('[WebRTC] Connected to host!');
+      // Reset connection attempts on successful connection
+      this.connectionAttempts.set('host', 0);
+      this.isReconnecting = false;
+      
+      // Check if we already have tracks
+      const peerWithConnection = peer as SimplePeer.Instance & { _pc?: RTCPeerConnection };
+      if (peerWithConnection._pc) {
+        const receivers = peerWithConnection._pc.getReceivers();
+        console.log('[WebRTC] Current receivers:', receivers.map(r => ({
+          track: r.track?.kind,
+          active: r.track?.enabled
+        })));
+        
+        // Check if remote streams are already available
+        const remoteStreams = peerWithConnection._pc.getRemoteStreams();
+        if (remoteStreams.length > 0) {
+          console.log('[WebRTC] Remote streams already available:', remoteStreams.length);
+          remoteStreams.forEach(stream => {
+            if (stream.getTracks().length > 0) {
+              this.onRemoteStream('host', stream);
+            }
+          });
+        }
+      }
+    });
+
+    // Add track event handler for better compatibility
+    (peer as any).on('track', (track: RTCTrackEvent) => {
+      console.log('[WebRTC] Received track:', track.track.kind);
     });
 
     peer.on('error', (err) => {
@@ -107,11 +158,13 @@ export class WebRTCSignaling {
       console.log('[WebRTC] Connection to host closed');
       this.peers.delete('host');
       // Attempt to reconnect after a delay
-      setTimeout(() => {
-        if (!this.isHost && this.signalChannel) {
+      if (!this.isHost && this.signalChannel && !this.isReconnecting) {
+        this.isReconnecting = true;
+        setTimeout(() => {
+          this.isReconnecting = false;
           this.connectToHost();
-        }
-      }, 3000);
+        }, 3000);
+      }
     });
 
     this.peers.set('host', peer);
@@ -147,10 +200,18 @@ export class WebRTCSignaling {
     const existingPeer = this.peers.get(data.from);
     if (existingPeer && !existingPeer.destroyed) {
       console.log('[WebRTC] Already have connection for participant:', data.from);
-      // Signal the existing peer instead of creating a new one
-      existingPeer.signal(data.signal);
+      // Don't process new offers for existing connections
       return;
     }
+
+    // Log stream details before creating peer
+    console.log('[WebRTC] Creating peer with stream:', {
+      hasStream: !!this.stream,
+      videoTracks: this.stream.getVideoTracks().length,
+      audioTracks: this.stream.getAudioTracks().length,
+      videoEnabled: this.stream.getVideoTracks()[0]?.enabled,
+      audioEnabled: this.stream.getAudioTracks()[0]?.enabled
+    });
 
     const peer = new SimplePeer({
       initiator: false,
@@ -182,6 +243,15 @@ export class WebRTCSignaling {
 
     peer.on('connect', () => {
       console.log('[WebRTC] Host connected to participant:', data.from);
+      // Log the connection details
+      const peerWithConnection = peer as SimplePeer.Instance & { _pc?: RTCPeerConnection };
+      if (peerWithConnection._pc) {
+        const senders = peerWithConnection._pc.getSenders();
+        console.log('[WebRTC] Sending tracks:', senders.map(s => ({
+          track: s.track?.kind,
+          active: s.track?.enabled
+        })));
+      }
     });
 
     peer.on('error', (err) => {
@@ -227,6 +297,12 @@ export class WebRTCSignaling {
   }
 
   private onRemoteStream(peerId: string, stream: MediaStream) {
+    console.log('[WebRTC] Dispatching remoteStream event for peer:', peerId, {
+      streamId: stream.id,
+      videoTracks: stream.getVideoTracks().length,
+      audioTracks: stream.getAudioTracks().length
+    });
+    
     // Emit event or callback to handle remote stream
     const event = new CustomEvent('remoteStream', { 
       detail: { peerId, stream } 

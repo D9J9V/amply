@@ -67,12 +67,25 @@ export function useWebRTC({ partyId, userId, isHost, enabled = true }: UseWebRTC
       }
 
       // Set up event listener for remote streams
-      const handleRemoteStream = (event: CustomEvent) => {
+      const handleRemoteStream = async (event: CustomEvent) => {
         const { stream } = event.detail;
+        console.log('[WebRTC Hook] Received remote stream:', {
+          id: stream.id,
+          tracks: stream.getTracks().map((t: MediaStreamTrack) => ({ kind: t.kind, enabled: t.enabled }))
+        });
+        
         setRemoteStream(stream);
         
         if (remoteVideoRef.current) {
           remoteVideoRef.current.srcObject = stream;
+          // Try to play the video (autoplay might be blocked)
+          try {
+            await remoteVideoRef.current.play();
+            console.log('[WebRTC Hook] Video playback started');
+          } catch (err) {
+            console.error('[WebRTC Hook] Video autoplay failed:', err);
+            // Video will play when user interacts with the page
+          }
         }
         
         setIsConnected(true);
@@ -179,7 +192,12 @@ export function useWebRTC({ partyId, userId, isHost, enabled = true }: UseWebRTC
   // Update remote video element when remote stream changes
   useEffect(() => {
     if (remoteVideoRef.current && remoteStream) {
+      console.log('[WebRTC Hook] Setting remote stream on video element in effect');
       remoteVideoRef.current.srcObject = remoteStream;
+      // Ensure video plays
+      remoteVideoRef.current.play().catch(err => {
+        console.error('[WebRTC Hook] Video play failed in effect:', err);
+      });
     }
   }, [remoteStream]);
 
