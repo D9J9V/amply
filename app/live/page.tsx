@@ -6,7 +6,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Users, Search, Radio, Calendar, Clock, Eye, Star, Zap, Gift, TrendingUp, Shield, Globe } from "lucide-react"
+import { Users, Search, Radio, Calendar, Clock, Eye, Star, Zap, Gift, TrendingUp, Shield, Globe, Music } from "lucide-react"
 import WorldIdBadge from "@/components/world-id-badge"
 import { useWorldId } from "@/contexts/world-id-context"
 import { Card, CardContent } from "@/components/ui/card"
@@ -220,6 +220,26 @@ export default function LivePage() {
               </Badge>
             </Button>
           ))}
+        </div>
+      </section>
+
+      {/* Listening Party Section */}
+      <section className="mobile-padding py-6 sm:py-8">
+        <div className="bg-gradient-to-r from-amply-orange to-amply-pink rounded-3xl p-6 shadow-card">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex-1">
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">Listening Party Playlists</h3>
+              <p className="text-white/80 text-sm sm:text-base">
+                Join verified humans creating authentic playlists in real-time
+              </p>
+            </div>
+            <Link href="/listening-party" className="flex-shrink-0 w-full sm:w-auto">
+              <Button className="bg-white hover:bg-gray-50 text-amply-black px-6 py-3 rounded-2xl font-semibold shadow-soft w-full sm:w-auto">
+                <Music className="w-4 h-4 mr-2" />
+                Explore Parties
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 

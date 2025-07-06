@@ -1,16 +1,37 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Music, Upload, Zap, Users, TrendingUp, DollarSign, Play, Heart } from "lucide-react"
+import { Music, Upload, Zap, Users, TrendingUp, DollarSign, Play, Heart, Globe, CheckCircle } from "lucide-react"
 import Link from "next/link"
 import WorldIdBadge from "@/components/world-id-badge"
 import UploadSection from "./upload-section"
+import { useWorldId } from "@/contexts/world-id-context"
 
 export default function ArtistPage() {
   const [activeTab, setActiveTab] = useState("overview")
+  const { isArtistVerified, verifyArtist, verificationLoading } = useWorldId()
+  const [showVerificationPrompt, setShowVerificationPrompt] = useState(false)
+
+  // Check if artist needs verification
+  useEffect(() => {
+    if (!isArtistVerified) {
+      setShowVerificationPrompt(true)
+    }
+  }, [isArtistVerified])
+
+  const handleArtistVerification = async () => {
+    try {
+      const result = await verifyArtist('artist-dashboard-access')
+      if (result?.status === 'success') {
+        setShowVerificationPrompt(false)
+      }
+    } catch (error) {
+      console.error('Artist verification error:', error)
+    }
+  }
 
   const stats = [
     { label: "Total Streams", value: "2.4M", icon: Play, color: "text-amply-orange" },
@@ -88,6 +109,32 @@ export default function ArtistPage() {
       </header>
 
       <main className="container mx-auto px-6 py-8">
+        {/* Artist Verification Prompt */}
+        {showVerificationPrompt && !isArtistVerified && (
+          <div className="bg-blue-50 border border-blue-200 rounded-3xl p-6 mb-8">
+            <div className="flex items-start space-x-4">
+              <Globe className="w-8 h-8 text-blue-600 flex-shrink-0 mt-1" />
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-blue-900 mb-2">
+                  Artist Verification Required
+                </h3>
+                <p className="text-blue-700 mb-4">
+                  Verify your humanity with World ID to access all artist features and upload content.
+                </p>
+                <Button
+                  onClick={handleArtistVerification}
+                  disabled={verificationLoading}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-2xl"
+                >
+                  {verificationLoading ? 'Verifying...' : 'Verify with World ID'}
+                </Button>
+              </div>
+              {isArtistVerified && (
+                <CheckCircle className="w-6 h-6 text-green-600" />
+              )}
+            </div>
+          </div>
+        )}
         {/* Hero Section */}
         <div className="bg-gradient-to-r from-amply-orange to-amply-pink rounded-4xl p-8 md:p-12 text-white mb-8">
           <div className="max-w-4xl">
@@ -97,18 +144,31 @@ export default function ArtistPage() {
               verification.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/create/music">
-                <Button className="bg-amply-white text-amply-orange hover:bg-gray-100 px-8 py-4 text-lg rounded-2xl font-semibold">
-                  <Upload className="w-5 h-5 mr-2" />
-                  Upload Music
+              {isArtistVerified ? (
+                <>
+                  <Link href="/create/music">
+                    <Button className="bg-amply-white text-amply-orange hover:bg-gray-100 px-8 py-4 text-lg rounded-2xl font-semibold">
+                      <Upload className="w-5 h-5 mr-2" />
+                      Upload Music
+                    </Button>
+                  </Link>
+                  <Link href="/create/drop">
+                    <Button className="bg-amply-white/20 text-white border-2 border-white/30 hover:bg-amply-white/30 px-8 py-4 text-lg rounded-2xl font-semibold">
+                      <Zap className="w-5 h-5 mr-2" />
+                      Create NFT Drop
+                    </Button>
+                  </Link>
+                </>
+              ) : (
+                <Button 
+                  onClick={handleArtistVerification}
+                  disabled={verificationLoading}
+                  className="bg-amply-white text-amply-orange hover:bg-gray-100 px-8 py-4 text-lg rounded-2xl font-semibold"
+                >
+                  <Globe className="w-5 h-5 mr-2" />
+                  {verificationLoading ? 'Verifying...' : 'Verify to Upload'}
                 </Button>
-              </Link>
-              <Link href="/create/drop">
-                <Button className="bg-amply-white/20 text-white border-2 border-white/30 hover:bg-amply-white/30 px-8 py-4 text-lg rounded-2xl font-semibold">
-                  <Zap className="w-5 h-5 mr-2" />
-                  Create NFT Drop
-                </Button>
-              </Link>
+              )}
             </div>
           </div>
         </div>
