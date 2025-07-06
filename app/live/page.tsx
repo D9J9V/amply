@@ -21,7 +21,7 @@ export default function LivePage() {
 
   // Trigger verification on page load if not verified
   useEffect(() => {
-    if (!isVerified) {
+    if (!isVerified && typeof window !== 'undefined') {
       // Small delay to let the page render first
       const timer = setTimeout(() => {
         verifyHuman('live-page-access')

@@ -3,6 +3,8 @@ import type { Metadata } from "next"
 import BottomNavigation from "@/components/bottom-navigation"
 import { MiniKitProvider } from "@/components/providers/minikit-provider"
 import { WorldIdProvider } from "@/contexts/world-id-context"
+import { ErudaProvider } from "@/components/providers/eruda-provider"
+import ErrorBoundary from "@/components/error-boundary"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -122,14 +124,17 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-amply-gray-light font-sans antialiased safe-area-top safe-area-bottom">
-        <MiniKitProvider>
-          <WorldIdProvider>
-            {children}
-            <BottomNavigation />
-            <div className="md:hidden h-20 safe-area-bottom"></div>
-          </WorldIdProvider>
-        </MiniKitProvider>
-
+        <ErrorBoundary>
+          <ErudaProvider>
+            <MiniKitProvider>
+              <WorldIdProvider>
+                {children}
+                <BottomNavigation />
+                <div className="md:hidden h-20 safe-area-bottom"></div>
+              </WorldIdProvider>
+            </MiniKitProvider>
+          </ErudaProvider>
+        </ErrorBoundary>
       </body>
     </html>
   )
