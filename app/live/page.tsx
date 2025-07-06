@@ -197,13 +197,6 @@ export default function LivePage() {
               <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
               Filters
             </Button>
-            <Link href="/create/live">
-              <Button className="bg-red-500 hover:bg-red-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-2xl text-sm sm:text-base touch-target shadow-soft">
-                <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                <span className="hidden sm:inline">Create Stream</span>
-                <span className="sm:hidden">Create</span>
-              </Button>
-            </Link>
           </div>
         </div>
       </header>
@@ -228,6 +221,16 @@ export default function LivePage() {
             </Button>
           ))}
         </div>
+      </section>
+
+      {/* Create Stream Button - Always Visible */}
+      <section className="mobile-padding pb-4">
+        <Link href="/create/live" className="block">
+          <Button className="bg-red-500 hover:bg-red-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-2xl text-sm sm:text-base touch-target shadow-soft w-full sm:w-auto flex items-center justify-center">
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+            <span>Create Stream</span>
+          </Button>
+        </Link>
       </section>
 
       {/* Listening Party Section */}
