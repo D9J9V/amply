@@ -372,6 +372,7 @@ export default function LiveListeningParty() {
                           console.log('[Listening Party] Container clicked - attempting play');
                           try {
                             await remoteVideoRef.current.play();
+                            setPlaybackStarted(true);
                           } catch (err) {
                             console.error('[Listening Party] Container click play failed:', err);
                           }
@@ -433,21 +434,15 @@ export default function LiveListeningParty() {
                                     remoteVideoRef.current.srcObject = remoteStream;
                                   }
                                   
-                                  // Wait for video to be ready if needed
-                                  if (remoteVideoRef.current.readyState < 2) {
-                                    console.log('[Listening Party] Waiting for video to be ready...');
-                                    await new Promise((resolve) => {
-                                      remoteVideoRef.current!.addEventListener('loadeddata', resolve, { once: true });
-                                    });
-                                  }
-                                  
+                                  // Just try to play directly - the browser will handle readyState internally
                                   console.log('[Listening Party] Direct play attempt');
-                                  const playPromise = remoteVideoRef.current.play();
-                                  
-                                  if (playPromise !== undefined) {
-                                    await playPromise;
+                                  try {
+                                    await remoteVideoRef.current.play();
                                     console.log('[Listening Party] Play successful');
                                     setPlaybackStarted(true);
+                                  } catch (playErr) {
+                                    console.error('[Listening Party] Play error:', playErr);
+                                    throw playErr;
                                   }
                                 } else {
                                   console.error('[Listening Party] Missing video ref or stream');

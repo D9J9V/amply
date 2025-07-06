@@ -6,15 +6,29 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Users, Search, Radio, Calendar, Clock, Eye, Star, Zap, Gift, TrendingUp } from "lucide-react"
+import { Users, Search, Radio, Calendar, Clock, Eye, Star, Zap, Gift, TrendingUp, Shield, Globe } from "lucide-react"
 import WorldIdBadge from "@/components/world-id-badge"
+import { useWorldId } from "@/contexts/world-id-context"
+import { Card, CardContent } from "@/components/ui/card"
 
 export default function LivePage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [cardInView, setCardInView] = useState<number[]>([])
+  const { isVerified, verifyHuman, verificationLoading } = useWorldId()
 
   const router = useRouter()
+
+  // Trigger verification on page load if not verified
+  useEffect(() => {
+    if (!isVerified) {
+      // Small delay to let the page render first
+      const timer = setTimeout(() => {
+        verifyHuman('live-page-access')
+      }, 500)
+      return () => clearTimeout(timer)
+    }
+  }, [isVerified, verifyHuman])
 
   const categories = [
     { id: "all", label: "All", count: 12 },
@@ -94,6 +108,36 @@ export default function LivePage() {
 
   return (
     <div className="min-h-screen bg-amply-cream pb-24 md:pb-0">
+      {/* Verification Gate Overlay */}
+      {!isVerified && (
+        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <Card className="bg-gray-900 border-gray-800 shadow-2xl rounded-3xl max-w-md w-full">
+            <CardContent className="p-8 text-center">
+              <div className="w-20 h-20 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Globe className="w-10 h-10 text-blue-500" />
+              </div>
+              <h2 className="text-2xl font-bold text-white mb-4">Verification Required</h2>
+              <p className="text-gray-400 mb-6">
+                To access live streams on Amply, we need to verify you&apos;re a real human. This ensures authentic engagement and protects our artists from bots.
+              </p>
+              <Button 
+                onClick={() => verifyHuman('live-page-access')}
+                disabled={verificationLoading}
+                className="amply-button-primary px-8 py-3 rounded-2xl w-full mb-4"
+              >
+                <Shield className="w-5 h-5 mr-2" />
+                {verificationLoading ? 'Verifying...' : 'Verify with World ID'}
+              </Button>
+              <Link href="/">
+                <Button variant="ghost" className="text-gray-400 hover:text-white">
+                  Back to Home
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+      
       <header className="sticky top-0 z-50 bg-amply-white/95 backdrop-blur-md border-b border-gray-100 shadow-soft">
         <div className="mobile-padding mobile-padding-y">
           <div className="flex items-center justify-between mb-4 sm:mb-0">

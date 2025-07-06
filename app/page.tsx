@@ -31,6 +31,7 @@ import {
   Sparkles,
   BookOpen,
   Search,
+  Lock,
 } from "lucide-react"
 import Link from "next/link"
 import { MiniKit, Tokens, type PayCommandInput } from '@worldcoin/minikit-js'
@@ -46,6 +47,7 @@ export default function HomePage() {
   const [activeTab, setActiveTab] = useState("for-you")
   const [purchasingItem, setPurchasingItem] = useState<number | null>(null)
   const [purchasedItems, setPurchasedItems] = useState<number[]>([])
+  const [pendingTab, setPendingTab] = useState<string | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const observerRef = useRef<HTMLDivElement>(null)
   const videoRefs = useRef<{ [key: number]: HTMLVideoElement | null }>({})
@@ -69,6 +71,14 @@ export default function HomePage() {
       setPurchasedItems(JSON.parse(saved))
     }
   }, [])
+
+  // Handle pending tab change after verification
+  useEffect(() => {
+    if (isVerified && pendingTab) {
+      setActiveTab(pendingTab)
+      setPendingTab(null)
+    }
+  }, [isVerified, pendingTab])
 
   // Infinite scroll
   useEffect(() => {
@@ -504,7 +514,15 @@ export default function HomePage() {
 
           {/* Tabs Section - Mobile optimized */}
           <div className="mt-4 sm:mt-6">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <Tabs value={activeTab} onValueChange={(value) => {
+              // Trigger World ID verification for specific tabs
+              if (!isVerified && (value === 'drops' || value === 'live')) {
+                setPendingTab(value)
+                verifyHuman(`${value}-tab-access`)
+                return // Don't change tab until verified
+              }
+              setActiveTab(value)
+            }} className="w-full">
               <TabsList className="grid w-full grid-cols-5 bg-gray-50 rounded-2xl sm:rounded-3xl p-1 sm:p-2 border-0 h-auto">
                 <TabsTrigger
                   value="for-you"
@@ -529,20 +547,38 @@ export default function HomePage() {
                 </TabsTrigger>
                 <TabsTrigger
                   value="drops"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amply-orange data-[state=active]:to-amply-pink data-[state=active]:text-white text-gray-600 font-medium rounded-xl sm:rounded-2xl py-2 sm:py-3 text-xs sm:text-sm transition-all"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amply-orange data-[state=active]:to-amply-pink data-[state=active]:text-white text-gray-600 font-medium rounded-xl sm:rounded-2xl py-2 sm:py-3 text-xs sm:text-sm transition-all relative"
                 >
-                  <Zap className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  {!isVerified ? (
+                    <Lock className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  ) : (
+                    <Zap className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  )}
                   <span className="truncate">Drops</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="live"
-                  className="data-[state=active]:bg-red-500 data-[state=active]:text-white text-gray-600 font-medium rounded-xl sm:rounded-2xl py-2 sm:py-3 text-xs sm:text-sm transition-all"
+                  className="data-[state=active]:bg-red-500 data-[state=active]:text-white text-gray-600 font-medium rounded-xl sm:rounded-2xl py-2 sm:py-3 text-xs sm:text-sm transition-all relative"
                 >
-                  <Radio className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  {!isVerified ? (
+                    <Lock className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  ) : (
+                    <Radio className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  )}
                   <span className="truncate">Live</span>
                 </TabsTrigger>
               </TabsList>
             </Tabs>
+
+            {/* Verification Info */}
+            {!isVerified && (
+              <div className="mt-3 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center space-x-2">
+                <Lock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <p className="text-xs sm:text-sm text-blue-600 dark:text-blue-400 font-medium">
+                  Drops and Live tabs require World ID verification
+                </p>
+              </div>
+            )}
 
             {/* Desktop Navigation Buttons - Hidden on mobile */}
             <div className="hidden lg:flex items-center justify-center space-x-4 mt-4">
