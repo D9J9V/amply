@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Card, CardContent } from "@/components/ui/card"
+import { useWorldId } from "@/contexts/world-id-context"
 import {
   BookOpen,
   Search,
@@ -23,6 +25,9 @@ import {
   Trash2,
   Plus,
   Filter,
+  Lock,
+  Globe,
+  Shield,
 } from "lucide-react"
 import Link from "next/link"
 import WorldIdBadge from "@/components/world-id-badge"
@@ -31,6 +36,7 @@ export default function LibraryPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [currentPlaying, setCurrentPlaying] = useState<number | null>(null)
   const [selectedItems, setSelectedItems] = useState<number[]>([])
+  const { isVerified, verifyHuman, verificationLoading } = useWorldId()
 
   const handlePlay = (itemId: number) => {
     setCurrentPlaying(currentPlaying === itemId ? null : itemId)
@@ -78,6 +84,35 @@ export default function LibraryPage() {
         rarity: "Rare",
         verified: true,
         humanVerified: true,
+        exclusive: true,
+      },
+    ],
+    exclusive: [
+      {
+        id: 7,
+        type: "music",
+        title: "Exclusive: Behind the Scenes",
+        artist: "Various Artists",
+        image: "/placeholder.svg?height=300&width=300&text=Exclusive+Content",
+        duration: "12:34",
+        addedAt: "1 day ago",
+        verified: true,
+        humanVerified: true,
+        exclusive: true,
+        requiresVerification: true,
+      },
+      {
+        id: 8,
+        type: "drop",
+        title: "Limited Edition Masters",
+        artist: "Top Artists",
+        image: "/placeholder.svg?height=300&width=300&text=Limited+Masters",
+        price: "0.1 WLD",
+        rarity: "Legendary",
+        verified: true,
+        humanVerified: true,
+        exclusive: true,
+        requiresVerification: true,
       },
     ],
     playlists: [
@@ -179,7 +214,7 @@ export default function LibraryPage() {
           </nav>
 
           <div className="flex items-center space-x-4">
-            <WorldIdBadge size="sm" />
+            {isVerified && <WorldIdBadge size="sm" />}
             <Link href="/profile">
               <Button className="amply-button-primary px-6 py-2 rounded-2xl">
                 <Users className="w-4 h-4 mr-2" />
@@ -226,7 +261,7 @@ export default function LibraryPage() {
 
         {/* Library Tabs */}
         <Tabs defaultValue="liked" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-gray-50 rounded-3xl p-2 mb-8">
+          <TabsList className="grid w-full grid-cols-5 bg-gray-50 rounded-3xl p-2 mb-8">
             <TabsTrigger value="liked" className="rounded-2xl py-3">
               <Heart className="w-4 h-4 mr-2" />
               Liked
@@ -234,6 +269,10 @@ export default function LibraryPage() {
             <TabsTrigger value="purchased" className="rounded-2xl py-3">
               <Zap className="w-4 h-4 mr-2" />
               Purchased
+            </TabsTrigger>
+            <TabsTrigger value="exclusive" className="rounded-2xl py-3">
+              <Lock className="w-4 h-4 mr-2" />
+              Exclusive
             </TabsTrigger>
             <TabsTrigger value="playlists" className="rounded-2xl py-3">
               <BookOpen className="w-4 h-4 mr-2" />
@@ -525,6 +564,113 @@ export default function LibraryPage() {
                 )
               })}
             </div>
+          </TabsContent>
+
+          {/* Exclusive Content */}
+          <TabsContent value="exclusive" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-amply-black">Exclusive Content</h2>
+              <Badge className="bg-purple-500/20 text-purple-600 border-0">
+                {libraryItems.exclusive.length} items
+              </Badge>
+            </div>
+
+            {!isVerified ? (
+              <Card className="bg-amply-white border-0 shadow-card rounded-3xl">
+                <CardContent className="p-8 text-center">
+                  <div className="w-20 h-20 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Globe className="w-10 h-10 text-blue-500" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-amply-black mb-4">Verification Required</h3>
+                  <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                    Access exclusive content by verifying you&apos;re a real human. This ensures only authentic fans can enjoy premium content.
+                  </p>
+                  <Button 
+                    onClick={() => verifyHuman('exclusive-content-access')}
+                    disabled={verificationLoading}
+                    className="amply-button-primary px-8 py-3 rounded-2xl"
+                  >
+                    <Shield className="w-5 h-5 mr-2" />
+                    {verificationLoading ? 'Verifying...' : 'Verify with World ID'}
+                  </Button>
+                  <p className="text-sm text-gray-500 mt-4">
+                    Once verified, you&apos;ll have access to all exclusive content
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {libraryItems.exclusive.map((item) => {
+                  const isPlaying = currentPlaying === item.id
+                  const isSelected = selectedItems.includes(item.id)
+
+                  return (
+                    <div
+                      key={item.id}
+                      className={`bg-amply-white rounded-3xl overflow-hidden shadow-card hover:shadow-card-hover transition-all cursor-pointer ${
+                        isSelected ? "ring-2 ring-purple-500" : ""
+                      }`}
+                    >
+                      <div className="relative aspect-square">
+                        <img
+                          src={item.image || "/placeholder.svg"}
+                          alt={item.title}
+                          className="object-cover w-full h-full"
+                        />
+
+                        <Badge className="absolute top-4 left-4 bg-purple-500 text-white px-3 py-1 rounded-2xl">
+                          <Lock className="w-3 h-3 mr-1" />
+                          Exclusive
+                        </Badge>
+
+                        <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity">
+                          <Button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handlePlay(item.id)
+                            }}
+                            className="w-16 h-16 bg-amply-white/20 hover:bg-amply-white/30 text-white border-0 rounded-full backdrop-blur-md"
+                          >
+                            {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-1" />}
+                          </Button>
+                        </div>
+                      </div>
+
+                      <div className="p-6 space-y-4">
+                        <div>
+                          <h3 className="font-bold text-amply-black mb-1">{item.title}</h3>
+                          <div className="flex items-center space-x-2">
+                            <p className="text-gray-600">{item.artist}</p>
+                            {item.humanVerified && <WorldIdBadge size="sm" />}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between text-sm text-gray-500">
+                          {item.type === 'music' && (
+                            <>
+                              <span>{item.duration}</span>
+                              <span>{item.addedAt}</span>
+                            </>
+                          )}
+                          {item.type === 'drop' && (
+                            <>
+                              <Badge className="bg-purple-100 text-purple-700 border-0">
+                                {item.rarity}
+                              </Badge>
+                              <span className="font-semibold text-purple-600">{item.price}</span>
+                            </>
+                          )}
+                        </div>
+
+                        <Button className="w-full amply-button-primary py-3 rounded-2xl">
+                          {item.type === 'music' ? 'Play Exclusive' : 'View NFT'}
+                        </Button>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </main>

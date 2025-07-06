@@ -7,15 +7,17 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { Upload, Music, ImageIcon, Check, Play, Pause, Volume2, Users, Globe, ArrowLeft } from "lucide-react"
+import { Upload, Music, ImageIcon, Check, Play, Pause, Volume2, Users, Globe, ArrowLeft, Shield } from "lucide-react"
 import Link from "next/link"
 import WorldIdBadge from "@/components/world-id-badge"
+import { useWorldId } from "@/contexts/world-id-context"
 
 export default function CreateMusicPage() {
   const [uploadProgress, setUploadProgress] = useState(0)
   const [isUploading, setIsUploading] = useState(false)
   const [uploadComplete, setUploadComplete] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
+  const { isArtistVerified, verifyArtist, verificationLoading, isVerified } = useWorldId()
 
   const handleUpload = () => {
     setIsUploading(true)
@@ -56,7 +58,13 @@ export default function CreateMusicPage() {
           </div>
 
           <div className="flex items-center space-x-4">
-            <WorldIdBadge size="sm" />
+            {isVerified && <WorldIdBadge size="sm" />}
+            {isArtistVerified && (
+              <Badge className="bg-purple-100 text-purple-700 px-3 py-1 rounded-2xl">
+                <Shield className="w-3 h-3 mr-1" />
+                Verified Artist
+              </Badge>
+            )}
             <Link href="/profile">
               <Button className="amply-button-primary px-6 py-2 rounded-2xl">
                 <Users className="w-4 h-4 mr-2" />
@@ -77,7 +85,33 @@ export default function CreateMusicPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Artist Verification Gate */}
+          {!isArtistVerified && (
+            <Card className="bg-amply-white border-0 shadow-card rounded-3xl mb-8">
+              <CardContent className="p-8 text-center">
+                <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Shield className="w-10 h-10 text-purple-600" />
+                </div>
+                <h2 className="text-2xl font-bold text-amply-black mb-4">Artist Verification Required</h2>
+                <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                  To upload music on Amply, you need to verify that you&apos;re a human artist. This is a one-time verification that ensures only real artists can share their music.
+                </p>
+                <Button 
+                  onClick={() => verifyArtist(`artist-${Date.now()}`)}
+                  disabled={verificationLoading}
+                  className="amply-button-primary px-8 py-3 rounded-2xl"
+                >
+                  <Shield className="w-5 h-5 mr-2" />
+                  {verificationLoading ? 'Verifying...' : 'Verify as Artist'}
+                </Button>
+                <p className="text-sm text-gray-500 mt-4">
+                  This verification uses World ID and can only be done once per person.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          <div className={`grid grid-cols-1 lg:grid-cols-2 gap-8 ${!isArtistVerified ? 'opacity-50 pointer-events-none' : ''}`}>
             {/* Upload Form */}
             <Card className="bg-amply-white border-0 shadow-card rounded-3xl">
               <CardHeader>
@@ -235,8 +269,11 @@ export default function CreateMusicPage() {
                   </div>
 
                   <div className="pt-4">
-                    <Button className="amply-button-primary w-full py-3 rounded-2xl" disabled={!uploadComplete}>
-                      {uploadComplete ? "Publish Track" : "Upload Audio First"}
+                    <Button 
+                      className="amply-button-primary w-full py-3 rounded-2xl" 
+                      disabled={!uploadComplete || !isArtistVerified}
+                    >
+                      {!isArtistVerified ? "Artist Verification Required" : uploadComplete ? "Publish Track" : "Upload Audio First"}
                     </Button>
                   </div>
                 </CardContent>

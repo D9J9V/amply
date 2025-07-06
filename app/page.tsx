@@ -7,6 +7,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import WorldIdBadge from "@/components/world-id-badge"
 import HumanVerifiedBadge from "@/components/human-verified-badge"
 import WorldIdOnboardingModal from "@/components/world-id-onboarding-modal"
+import { useWorldId } from "@/contexts/world-id-context"
 import {
   Play,
   Pause,
@@ -35,7 +36,7 @@ import Link from "next/link"
 
 export default function HomePage() {
   const [showOnboarding, setShowOnboarding] = useState(false)
-  const [isConnected, setIsConnected] = useState(false)
+  const { isVerified, verifyHuman, verificationLoading, shareToWorldApp } = useWorldId()
   const [currentPlaying, setCurrentPlaying] = useState<number | null>(null)
   const [likedItems, setLikedItems] = useState<number[]>([])
   const [isMuted, setIsMuted] = useState(true)
@@ -161,14 +162,23 @@ export default function HomePage() {
     }
   }
 
-  const handleWorldIdConnect = () => {
-    setIsConnected(true)
+  const handleWorldIdConnect = async () => {
     localStorage.setItem("amply-onboarding-seen", "true")
-    console.log("Connecting to World ID...")
+    setShowOnboarding(false)
+    
+    // Perform World ID verification
+    const result = await verifyHuman('home-page-access')
+    
+    if (result && result.status === 'success') {
+      console.log("World ID verification successful!")
+    } else {
+      console.error("World ID verification failed")
+    }
   }
 
   const handleWorldIdSkip = () => {
     localStorage.setItem("amply-onboarding-seen", "true")
+    setShowOnboarding(false)
     console.log("User skipped World ID verification")
   }
 
@@ -412,16 +422,17 @@ export default function HomePage() {
             </div>
 
             <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
-              {isConnected ? (
+              {isVerified ? (
                 <HumanVerifiedBadge size="sm" />
               ) : (
                 <Button
                   onClick={() => setShowOnboarding(true)}
+                  disabled={verificationLoading}
                   className="amply-button-primary px-3 sm:px-6 py-2 text-xs sm:text-sm rounded-2xl touch-target"
                 >
                   <Globe className="w-4 h-4 mr-1 sm:mr-2" />
-                  <span className="hidden xs:inline">Connect</span>
-                  <span className="xs:hidden">ID</span>
+                  <span className="hidden xs:inline">{verificationLoading ? 'Verifying...' : 'Connect'}</span>
+                  <span className="xs:hidden">{verificationLoading ? '...' : 'ID'}</span>
                 </Button>
               )}
 
@@ -742,6 +753,10 @@ export default function HomePage() {
                       <Button
                         size="sm"
                         variant="ghost"
+                        onClick={() => shareToWorldApp(
+                          `Check out "${item.title}" by ${item.artist} on Amply! 🎵`,
+                          `https://amply-seven.vercel.app/${item.type}/${item.id}`
+                        )}
                         className="text-white hover:bg-white/20 rounded-2xl sm:rounded-3xl p-3 sm:p-4 touch-target"
                       >
                         <Share2 className="w-5 h-5 sm:w-7 sm:h-7" />
@@ -757,10 +772,18 @@ export default function HomePage() {
                     </div>
 
                     {/* Main Action */}
-                    {item.type === "drop" && isConnected ? (
+                    {item.type === "drop" && isVerified ? (
                       <Button className="amply-button-secondary px-4 sm:px-8 py-3 sm:py-4 text-sm sm:text-base rounded-2xl sm:rounded-3xl touch-target">
                         <Zap className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                         Buy Drop
+                      </Button>
+                    ) : item.type === "drop" && !isVerified ? (
+                      <Button 
+                        onClick={() => setShowOnboarding(true)}
+                        className="amply-button-outline px-4 sm:px-8 py-3 sm:py-4 text-sm sm:text-base rounded-2xl sm:rounded-3xl touch-target"
+                      >
+                        <Globe className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                        Verify to Buy
                       </Button>
                     ) : item.type === "live" ? (
                       <Link href={`/live/${item.id}`}>

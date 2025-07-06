@@ -5,8 +5,10 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Card, CardContent } from "@/components/ui/card"
 import WorldIdBadge from "@/components/world-id-badge"
 import HumanVerifiedBadge from "@/components/human-verified-badge"
+import { useWorldId } from "@/contexts/world-id-context"
 import {
   Play,
   Pause,
@@ -25,7 +27,11 @@ import {
   MessageCircle,
   Music,
   X,
+  Globe,
+  Shield,
+  Gift,
 } from "lucide-react"
+import { MiniKit, Tokens, type PayCommandInput } from '@worldcoin/minikit-js'
 import Link from "next/link"
 import { useParams } from "next/navigation"
 
@@ -39,10 +45,12 @@ export default function LiveStreamPage() {
   const [viewers, setViewers] = useState(1247)
   const [likes, setLikes] = useState(892)
   const [currentTime, setCurrentTime] = useState(0)
-  const [isConnected, setIsConnected] = useState(false)
   const [showControls, setShowControls] = useState(true)
   const [isChatVisible, setIsChatVisible] = useState(true)
+  const [isTipping, setIsTipping] = useState(false)
+  const [tipAmount, setTipAmount] = useState<string>("0.01")
   const chatEndRef = useRef<HTMLDivElement>(null)
+  const { isVerified, verifyHuman, verificationLoading, shareToWorldApp } = useWorldId()
 
   // Mock live stream data
   const streamData = {
@@ -134,8 +142,8 @@ export default function LiveStreamPage() {
         user: "You",
         message: chatMessage,
         timestamp: "now",
-        verified: isConnected,
-        humanVerified: isConnected,
+        verified: isVerified,
+        humanVerified: isVerified,
       }
       setChatMessages([...chatMessages, newMessage])
       setChatMessage("")
@@ -154,6 +162,44 @@ export default function LiveStreamPage() {
     } else {
       document.exitFullscreen()
       setIsFullscreen(false)
+    }
+  }
+
+  const handleTipArtist = async () => {
+    if (!isVerified) {
+      // Show verification modal instead
+      await verifyHuman(`tip-artist-${params.id}`)
+      return
+    }
+
+    try {
+      setIsTipping(true)
+      
+      // Convert WLD to smallest unit
+      const tipAmountWei = BigInt(parseFloat(tipAmount) * 1e18).toString()
+      
+      const payPayload: PayCommandInput = {
+        reference: `tip-live-${params.id}-${Date.now()}`,
+        to: '0x1234567890123456789012345678901234567890', // Artist's wallet address
+        tokens: [
+          {
+            symbol: Tokens.WLD,
+            token_amount: tipAmountWei,
+          },
+        ],
+        description: `Tip for ${streamData.artist}'s live stream`,
+      }
+
+      const { finalPayload } = await MiniKit.commandsAsync.pay(payPayload)
+      
+      if (finalPayload.status === 'success') {
+        // Show success notification
+        console.log('Tip sent successfully!')
+      }
+    } catch (error) {
+      console.error('Tipping failed:', error)
+    } finally {
+      setIsTipping(false)
     }
   }
 
@@ -184,19 +230,40 @@ export default function LiveStreamPage() {
               LIVE
             </Badge>
 
-            {isConnected ? (
-              <HumanVerifiedBadge size="sm" />
-            ) : (
-              <Button
-                onClick={() => setIsConnected(true)}
-                className="amply-button-primary px-4 py-2 text-sm rounded-2xl"
-              >
-                Connect World ID
-              </Button>
-            )}
+            {isVerified && <HumanVerifiedBadge size="sm" />}
           </div>
         </div>
       </header>
+
+      {/* Verification Gate Overlay */}
+      {!isVerified && (
+        <div className="fixed inset-0 z-40 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <Card className="bg-gray-900 border-gray-800 shadow-2xl rounded-3xl max-w-md w-full">
+            <CardContent className="p-8 text-center">
+              <div className="w-20 h-20 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Globe className="w-10 h-10 text-blue-500" />
+              </div>
+              <h2 className="text-2xl font-bold text-white mb-4">Human Verification Required</h2>
+              <p className="text-gray-400 mb-6">
+                To join live streams on Amply, we need to verify you&apos;re a real human. This ensures authentic engagement and protects our artists from bots.
+              </p>
+              <Button 
+                onClick={() => verifyHuman(`live-stream-${params.id}`)}
+                disabled={verificationLoading}
+                className="amply-button-primary px-8 py-3 rounded-2xl w-full mb-4"
+              >
+                <Shield className="w-5 h-5 mr-2" />
+                {verificationLoading ? 'Verifying...' : 'Verify with World ID'}
+              </Button>
+              <Link href="/live">
+                <Button variant="ghost" className="text-gray-400 hover:text-white">
+                  Back to Live Streams
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       <div className="pt-20 grid grid-cols-1 lg:grid-cols-4 gap-0 h-screen">
         {/* Video Player */}
@@ -269,6 +336,34 @@ export default function LiveStreamPage() {
                     {likes.toLocaleString()} likes
                   </span>
                 </div>
+
+                {/* Tip Button */}
+                <div className="flex items-center space-x-4">
+                  <Button
+                    onClick={handleTipArtist}
+                    disabled={isTipping}
+                    className="bg-gradient-to-r from-amply-orange to-amply-pink hover:from-amply-orange/90 hover:to-amply-pink/90 text-white px-6 py-3 rounded-2xl font-semibold shadow-lg transition-all"
+                  >
+                    <Gift className="w-5 h-5 mr-2" />
+                    {isTipping ? 'Processing...' : `Tip ${tipAmount} WLD`}
+                  </Button>
+                  
+                  {/* Quick tip amounts */}
+                  <div className="flex space-x-2">
+                    {['0.01', '0.05', '0.1'].map((amount) => (
+                      <Button
+                        key={amount}
+                        onClick={() => setTipAmount(amount)}
+                        variant="ghost"
+                        className={`text-white/70 hover:text-white hover:bg-white/20 px-3 py-1 rounded-xl text-sm ${
+                          tipAmount === amount ? 'bg-white/20 text-white' : ''
+                        }`}
+                      >
+                        {amount} WLD
+                      </Button>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -303,7 +398,13 @@ export default function LiveStreamPage() {
                         <Heart className={`w-5 h-5 ${isLiked ? "fill-current" : ""}`} />
                       </Button>
 
-                      <Button className="text-white hover:bg-white/20 rounded-2xl p-3">
+                      <Button 
+                        onClick={() => shareToWorldApp(
+                          `🔴 LIVE: ${streamData.title} by ${streamData.artist} on Amply!`,
+                          `https://amply-seven.vercel.app/live/${params.id}`
+                        )}
+                        className="text-white hover:bg-white/20 rounded-2xl p-3"
+                      >
                         <Share2 className="w-5 h-5" />
                       </Button>
                     </div>
@@ -377,7 +478,7 @@ export default function LiveStreamPage() {
 
           {/* Chat Input */}
           <div className="p-4 border-t border-gray-200 bg-amply-white">
-            {isConnected ? (
+            {isVerified ? (
               <div className="flex space-x-2">
                 <Input
                   value={chatMessage}
@@ -397,7 +498,7 @@ export default function LiveStreamPage() {
             ) : (
               <div className="text-center space-y-3">
                 <p className="text-gray-600 text-sm">Connect with World ID to join the chat</p>
-                <Button onClick={() => setIsConnected(true)} className="amply-button-primary w-full rounded-2xl">
+                <Button onClick={() => verifyHuman(`chat-${params.id}`)} className="amply-button-primary w-full rounded-2xl">
                   Connect World ID
                 </Button>
               </div>

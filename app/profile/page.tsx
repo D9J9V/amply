@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Switch } from "@/components/ui/switch"
+import { useWorldId } from "@/contexts/world-id-context"
 import {
   Users,
   Settings,
@@ -33,6 +34,7 @@ import WorldIdBadge from "@/components/world-id-badge"
 
 export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false)
+  const { walletAddress, authenticateWallet, verificationLoading, isVerified } = useWorldId()
   const [profileData, setProfileData] = useState({
     name: "Alex Rivera",
     username: "@alexrivera",
@@ -139,7 +141,7 @@ export default function ProfilePage() {
             </nav>
 
             <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
-              <WorldIdBadge size="sm" className="hidden sm:flex" />
+              {isVerified && <WorldIdBadge size="sm" className="hidden sm:flex" />}
               <Button
                 onClick={() => setIsEditing(!isEditing)}
                 className="amply-button-outline px-3 sm:px-6 py-2 rounded-2xl text-sm sm:text-base touch-target"
@@ -217,7 +219,7 @@ export default function ProfilePage() {
                       <div>
                         <div className="flex items-center justify-center md:justify-start space-x-2 sm:space-x-3 mb-2 flex-wrap">
                           <h1 className="text-2xl sm:text-3xl font-bold text-amply-black">{profileData.name}</h1>
-                          <WorldIdBadge size="md" className="flex-shrink-0" />
+                          {isVerified && <WorldIdBadge size="md" className="flex-shrink-0" />}
                         </div>
                         <p className="text-gray-600 text-base sm:text-lg">{profileData.username}</p>
                       </div>
@@ -525,18 +527,48 @@ export default function ProfilePage() {
                     <CardDescription>Manage your wallet and payment methods</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="p-4 bg-gray-50 rounded-2xl">
-                      <div className="flex items-center justify-between mb-2">
-                        <p className="font-medium text-amply-black">World ID Wallet</p>
-                        <Badge className="bg-green-100 text-green-700">Connected</Badge>
-                      </div>
-                      <p className="text-sm text-gray-600">0x1234...5678</p>
-                    </div>
+                    {walletAddress ? (
+                      <>
+                        <div className="p-4 bg-gray-50 rounded-2xl">
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="font-medium text-amply-black">World ID Wallet</p>
+                            <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                          </div>
+                          <p className="text-sm text-gray-600">
+                            {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            Session expires in 7 days
+                          </p>
+                        </div>
 
-                    <Button className="w-full amply-button-outline py-3 rounded-2xl">
-                      <Wallet className="w-4 h-4 mr-2" />
-                      Manage Wallet
-                    </Button>
+                        <Button className="w-full amply-button-outline py-3 rounded-2xl">
+                          <Wallet className="w-4 h-4 mr-2" />
+                          Disconnect Wallet
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <div className="p-4 bg-gray-50 rounded-2xl">
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="font-medium text-amply-black">World ID Wallet</p>
+                            <Badge className="bg-gray-100 text-gray-600">Not Connected</Badge>
+                          </div>
+                          <p className="text-sm text-gray-600">
+                            Connect your World wallet to manage payments and tips
+                          </p>
+                        </div>
+
+                        <Button 
+                          onClick={authenticateWallet}
+                          disabled={verificationLoading}
+                          className="w-full amply-button-primary py-3 rounded-2xl"
+                        >
+                          <Wallet className="w-4 h-4 mr-2" />
+                          {verificationLoading ? 'Connecting...' : 'Connect Wallet'}
+                        </Button>
+                      </>
+                    )}
                   </CardContent>
                 </Card>
 
