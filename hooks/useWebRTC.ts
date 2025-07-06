@@ -78,7 +78,18 @@ export function useWebRTC({ partyId, userId, isHost, enabled = true }: UseWebRTC
         setRemoteStream(stream);
         
         if (remoteVideoRef.current) {
+          console.log('[WebRTC Hook] Setting stream on video element', {
+            streamActive: stream.active,
+            tracks: stream.getTracks().map((t: MediaStreamTrack) => ({
+              kind: t.kind,
+              enabled: t.enabled,
+              readyState: t.readyState,
+              muted: t.muted
+            }))
+          });
+          
           remoteVideoRef.current.srcObject = stream;
+          
           // Try to play the video (autoplay might be blocked)
           try {
             await remoteVideoRef.current.play();

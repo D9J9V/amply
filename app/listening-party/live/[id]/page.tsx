@@ -385,7 +385,7 @@ export default function LiveListeningParty() {
                         muted={false}
                         playsInline
                         controls={false}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover bg-gray-900 border-2 border-red-500"
                         onLoadedMetadata={() => {
                           console.log('[Listening Party] Video metadata loaded');
                         }}
@@ -393,7 +393,13 @@ export default function LiveListeningParty() {
                           console.log('[Listening Party] Video can play');
                         }}
                         onPlay={() => {
-                          console.log('[Listening Party] Video started playing');
+                          console.log('[Listening Party] Video started playing', {
+                            videoWidth: remoteVideoRef.current?.videoWidth,
+                            videoHeight: remoteVideoRef.current?.videoHeight,
+                            readyState: remoteVideoRef.current?.readyState,
+                            networkState: remoteVideoRef.current?.networkState,
+                            error: remoteVideoRef.current?.error
+                          });
                           setPlaybackStarted(true);
                         }}
                         onPause={() => {
