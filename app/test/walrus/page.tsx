@@ -67,6 +67,7 @@ export default function WalrusTestPage() {
   });
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioBuffering, setAudioBuffering] = useState(false);
+  const [audioLoaded, setAudioLoaded] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -77,6 +78,28 @@ export default function WalrusTestPage() {
   });
   const [privateVaultBlobId] = useState('example_private_vault_blob_id_123');
   const [userApiKey, setUserApiKey] = useState('');
+
+  // Load blobs from localStorage on mount
+  useEffect(() => {
+    const storedBlobs = localStorage.getItem('walrus-test-blobs');
+    if (storedBlobs) {
+      try {
+        const parsedBlobs = JSON.parse(storedBlobs);
+        setBlobs(parsedBlobs);
+        console.log('Loaded blobs from localStorage:', parsedBlobs.length);
+      } catch (error) {
+        console.error('Failed to parse stored blobs:', error);
+      }
+    }
+  }, []);
+
+  // Save blobs to localStorage whenever they change
+  useEffect(() => {
+    if (blobs.length > 0) {
+      localStorage.setItem('walrus-test-blobs', JSON.stringify(blobs));
+      console.log('Saved blobs to localStorage:', blobs.length);
+    }
+  }, [blobs]);
 
   // Enhanced upload with real XMLHttpRequest for progress tracking
   const uploadFileWithProgress = async (file: File, isDraft: boolean): Promise<BlobInfo | null> => {
@@ -247,11 +270,39 @@ export default function WalrusTestPage() {
 
   const handleRetrieveContent = () => {
     if (selectedBlob) {
+      console.log('Loading content for blob:', selectedBlob.blobId);
+      console.log('Full URL:', `${aggregatorUrl}/v1/blobs/${selectedBlob.blobId}`);
+      
       // Set audio source for streaming
       if (audioRef.current) {
-        audioRef.current.src = `${aggregatorUrl}/v1/blobs/${selectedBlob.blobId}`;
+        const streamUrl = `${aggregatorUrl}/v1/blobs/${selectedBlob.blobId}`;
+        console.log('Setting audio source to:', streamUrl);
+        
+        audioRef.current.src = streamUrl;
         audioRef.current.load();
+        
+        // Add error handling
+        audioRef.current.onerror = (e) => {
+          console.error('Audio loading error:', e);
+          console.error('Audio error code:', audioRef.current?.error?.code);
+          console.error('Audio error message:', audioRef.current?.error?.message);
+          setAudioLoaded(false);
+        };
+        
+        audioRef.current.onloadstart = () => {
+          console.log('Started loading audio...');
+          setAudioLoaded(false);
+        };
+        
+        audioRef.current.onloadedmetadata = () => {
+          console.log('Audio metadata loaded successfully');
+          setAudioLoaded(true);
+        };
+      } else {
+        console.error('Audio ref is not available');
       }
+    } else {
+      console.warn('No blob selected');
     }
   };
 
@@ -477,6 +528,21 @@ Timestamp: ${new Date().toISOString()}`;
               2. Stored Blobs with Metadata
             </h2>
             <div className="space-y-4">
+              {blobs.length > 0 && (
+                <button
+                  onClick={() => {
+                    if (confirm('Clear all stored blobs from localStorage?')) {
+                      setBlobs([]);
+                      localStorage.removeItem('walrus-test-blobs');
+                      setSelectedBlob(null);
+                      setAudioLoaded(false);
+                    }
+                  }}
+                  className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700"
+                >
+                  Clear All Blobs
+                </button>
+              )}
               {blobs.length === 0 ? (
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   No blobs uploaded yet. Upload a file to see it here.
@@ -491,7 +557,10 @@ Timestamp: ${new Date().toISOString()}`;
                           ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                           : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                       }`}
-                      onClick={() => setSelectedBlob(blob)}
+                      onClick={() => {
+                        setSelectedBlob(blob);
+                        setAudioLoaded(false);
+                      }}
                     >
                       <div className="space-y-2">
                         {blob.metadata && (
@@ -549,7 +618,18 @@ Timestamp: ${new Date().toISOString()}`;
                 Load Selected Content for Streaming
               </button>
 
-              {selectedBlob && audioRef.current?.src && (
+              {/* Always render audio element for ref availability */}
+              <audio
+                ref={audioRef}
+                controls
+                className="w-full"
+                preload="metadata"
+                style={{ display: 'none' }}
+              >
+                Your browser does not support the audio element.
+              </audio>
+
+              {selectedBlob && audioLoaded && (
                 <div className="space-y-4">
                   <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                     <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -567,12 +647,17 @@ Timestamp: ${new Date().toISOString()}`;
                       </div>
                     )}
 
-                    {/* Custom Audio Player */}
+                    {/* Visible audio player */}
                     <audio
-                      ref={audioRef}
                       controls
                       className="w-full"
                       preload="metadata"
+                      src={audioRef.current?.src}
+                      onWaiting={() => setAudioBuffering(true)}
+                      onCanPlay={() => setAudioBuffering(false)}
+                      onPlay={() => setIsPlaying(true)}
+                      onPause={() => setIsPlaying(false)}
+                      onEnded={() => setIsPlaying(false)}
                     >
                       Your browser does not support the audio element.
                     </audio>
@@ -594,7 +679,7 @@ Timestamp: ${new Date().toISOString()}`;
                       Stream URL (supports range requests):
                     </p>
                     <code className="text-xs break-all text-gray-600 dark:text-gray-400">
-                      {audioRef.current.src}
+                      {audioRef.current?.src}
                     </code>
                   </div>
                 </div>
