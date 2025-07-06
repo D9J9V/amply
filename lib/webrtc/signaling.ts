@@ -128,23 +128,30 @@ export class WebRTCSignaling {
           active: r.track?.enabled
         })));
         
-        // Check if remote streams are already available
-        const remoteStreams = peerWithConnection._pc.getRemoteStreams();
-        if (remoteStreams.length > 0) {
-          console.log('[WebRTC] Remote streams already available:', remoteStreams.length);
-          remoteStreams.forEach(stream => {
-            if (stream.getTracks().length > 0) {
-              this.onRemoteStream('host', stream);
-            }
-          });
+        // Check if remote tracks are already available
+        const transceivers = peerWithConnection._pc.getTransceivers();
+        const remoteTracks = transceivers
+          .filter(t => t.receiver.track && t.direction.includes('recv'))
+          .map(t => t.receiver.track);
+        
+        if (remoteTracks.length > 0) {
+          console.log('[WebRTC] Remote tracks already available:', remoteTracks.length);
+          // Create a MediaStream from the tracks
+          const stream = new MediaStream(remoteTracks);
+          if (stream.getTracks().length > 0) {
+            this.onRemoteStream('host', stream);
+          }
         }
       }
     });
 
     // Add track event handler for better compatibility
-    (peer as any).on('track', (track: RTCTrackEvent) => {
-      console.log('[WebRTC] Received track:', track.track.kind);
-    });
+    const peerWithTrackEvent = peer as SimplePeer.Instance & { on(event: 'track', listener: (track: RTCTrackEvent) => void): void };
+    if ('on' in peerWithTrackEvent && typeof peerWithTrackEvent.on === 'function') {
+      peerWithTrackEvent.on('track', (track: RTCTrackEvent) => {
+        console.log('[WebRTC] Received track:', track.track.kind);
+      });
+    }
 
     peer.on('error', (err) => {
       console.error('[WebRTC] Peer error:', err);

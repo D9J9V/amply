@@ -143,7 +143,7 @@ export default function TestWebRTC() {
   };
 
   // Handle incoming signals
-  const handleSignal = (payload: any) => {
+  const handleSignal = (payload: { from: string; signal: SimplePeer.SignalData }) => {
     if (payload.from === role) return; // Ignore own signals
     
     addLog(`Received signal from ${payload.from}: ${payload.signal.type || 'ice-candidate'}`);
@@ -300,8 +300,8 @@ export default function TestWebRTC() {
           <h3 className="text-lg font-semibold mb-2">Instructions</h3>
           <ol className="list-decimal list-inside space-y-1 text-sm text-gray-400">
             <li>Enter the same channel ID on both devices</li>
-            <li>Click "Start as Host" on the device that will stream</li>
-            <li>Click "Start as Viewer" on the device that will watch</li>
+            <li>Click &quot;Start as Host&quot; on the device that will stream</li>
+            <li>Click &quot;Start as Viewer&quot; on the device that will watch</li>
             <li>The connection should establish automatically</li>
             <li>Check the logs for any errors</li>
           </ol>

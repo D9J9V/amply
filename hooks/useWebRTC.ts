@@ -92,14 +92,14 @@ export function useWebRTC({ partyId, userId, isHost, enabled = true }: UseWebRTC
         setIsConnecting(false);
       };
 
-      window.addEventListener('remoteStream', handleRemoteStream as EventListener);
+      window.addEventListener('remoteStream', handleRemoteStream as unknown as EventListener);
 
       // Initialize signaling with stream
       await signalingRef.current.initialize(stream);
 
       // Clean up listener on unmount
       return () => {
-        window.removeEventListener('remoteStream', handleRemoteStream as EventListener);
+        window.removeEventListener('remoteStream', handleRemoteStream as unknown as EventListener);
       };
     } catch (err) {
       console.error('WebRTC initialization error:', err);
