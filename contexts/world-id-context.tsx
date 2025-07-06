@@ -60,18 +60,32 @@ export function WorldIdProvider({ children }: { children: React.ReactNode }) {
   const verifyHuman = useCallback(async (signal: string): Promise<MiniAppVerifyActionPayload | null> => {
     try {
       setVerificationLoading(true);
+      console.log('Starting World ID verification with signal:', signal);
+      
+      // Check if MiniKit is installed
+      if (!MiniKit.isInstalled()) {
+        console.error('MiniKit is not installed!');
+        // Try to install it
+        MiniKit.install();
+        console.log('MiniKit installed in verifyHuman');
+      }
       
       const verifyPayload = {
         action: 'verify_content_access',
         signal,
         verification_level: VerificationLevel.Orb,
       };
+      
+      console.log('Calling MiniKit.commandsAsync.verify with payload:', verifyPayload);
 
       const { finalPayload } = await MiniKit.commandsAsync.verify(verifyPayload);
+      
+      console.log('Verification response:', finalPayload);
       
       if (finalPayload.status === 'success') {
         setIsVerified(true);
         localStorage.setItem('worldIdVerified', 'true');
+        console.log('Verification successful!');
       }
       
       return finalPayload;
