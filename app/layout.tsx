@@ -113,13 +113,11 @@ export default function RootLayout({
         <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png" />
         <link rel="shortcut icon" href="/favicon.ico" />
 
-        {/* Manifest */}
-        <link rel="manifest" href="/manifest.json" />
 
-        {/* Viewport optimized for PWA */}
+        {/* Viewport */}
         <meta
           name="viewport"
-          content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover"
+          content="width=device-width, initial-scale=1"
         />
       </head>
       <body className="bg-amply-gray-light font-sans antialiased safe-area-top safe-area-bottom">
@@ -129,24 +127,6 @@ export default function RootLayout({
           <div className="md:hidden h-20 safe-area-bottom"></div>
         </MiniKitProvider>
 
-        {/* Service Worker Registration */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              if ('serviceWorker' in navigator) {
-                window.addEventListener('load', function() {
-                  navigator.serviceWorker.register('/sw.js')
-                    .then(function(registration) {
-                      console.log('✅ SW registered successfully:', registration.scope);
-                    })
-                    .catch(function(registrationError) {
-                      console.error('❌ SW registration failed:', registrationError);
-                    });
-                });
-              }
-            `,
-          }}
-        />
       </body>
     </html>
   )

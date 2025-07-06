@@ -33,6 +33,7 @@ import {
   Search,
 } from "lucide-react"
 import Link from "next/link"
+import { MiniKit, Tokens, type PayCommandInput } from '@worldcoin/minikit-js'
 
 export default function HomePage() {
   const [showOnboarding, setShowOnboarding] = useState(false)
@@ -43,6 +44,8 @@ export default function HomePage() {
   const [visibleItems, setVisibleItems] = useState(10)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [activeTab, setActiveTab] = useState("for-you")
+  const [purchasingItem, setPurchasingItem] = useState<number | null>(null)
+  const [purchasedItems, setPurchasedItems] = useState<number[]>([])
   const containerRef = useRef<HTMLDivElement>(null)
   const observerRef = useRef<HTMLDivElement>(null)
   const videoRefs = useRef<{ [key: number]: HTMLVideoElement | null }>({})
@@ -56,6 +59,14 @@ export default function HomePage() {
         setShowOnboarding(true)
       }, 1000)
       return () => clearTimeout(timer)
+    }
+  }, [])
+
+  // Load purchased items from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('purchasedDrops')
+    if (saved) {
+      setPurchasedItems(JSON.parse(saved))
     }
   }, [])
 
@@ -214,6 +225,46 @@ export default function HomePage() {
         top: prevIndex * window.innerHeight,
         behavior: "smooth",
       })
+    }
+  }
+
+  const handleBuyDrop = async (item: DropItem) => {
+    if (!isVerified) {
+      setShowOnboarding(true)
+      return
+    }
+
+    try {
+      setPurchasingItem(item.id)
+      
+      // Convert price to smallest unit (assuming price is in WLD)
+      const priceMatch = item.price.match(/(\d+\.?\d*)/);
+      const priceAmount = priceMatch ? parseFloat(priceMatch[1]) : 0.05;
+      const priceWei = BigInt(priceAmount * 1e18).toString()
+      
+      const payPayload: PayCommandInput = {
+        reference: `drop-${item.id}-${Date.now()}`,
+        to: '0x1234567890123456789012345678901234567890', // Artist's wallet
+        tokens: [
+          {
+            symbol: Tokens.WLD,
+            token_amount: priceWei,
+          },
+        ],
+        description: `Purchase "${item.title}" by ${item.artist}`,
+      }
+
+      const { finalPayload } = await MiniKit.commandsAsync.pay(payPayload)
+      
+      if (finalPayload.status === 'success') {
+        setPurchasedItems(prev => [...prev, item.id])
+        localStorage.setItem('purchasedDrops', JSON.stringify([...purchasedItems, item.id]))
+        console.log('Drop purchased successfully!')
+      }
+    } catch (error) {
+      console.error('Purchase failed:', error)
+    } finally {
+      setPurchasingItem(null)
     }
   }
 
@@ -773,9 +824,13 @@ export default function HomePage() {
 
                     {/* Main Action */}
                     {item.type === "drop" && isVerified ? (
-                      <Button className="amply-button-secondary px-4 sm:px-8 py-3 sm:py-4 text-sm sm:text-base rounded-2xl sm:rounded-3xl touch-target">
+                      <Button 
+                        onClick={() => handleBuyDrop(item)}
+                        disabled={purchasingItem === item.id}
+                        className="amply-button-secondary px-4 sm:px-8 py-3 sm:py-4 text-sm sm:text-base rounded-2xl sm:rounded-3xl touch-target"
+                      >
                         <Zap className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                        Buy Drop
+                        {purchasingItem === item.id ? 'Processing...' : purchasedItems.includes(item.id) ? 'Purchased' : 'Buy Drop'}
                       </Button>
                     ) : item.type === "drop" && !isVerified ? (
                       <Button 
