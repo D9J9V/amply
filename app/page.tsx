@@ -131,6 +131,13 @@ export default function HomePage() {
     }
   }
 
+  // Walrus video URLs from decentralized storage
+  const walrusVideos = {
+    teamm: "https://aggregator.walrus-testnet.walrus.space/v1/blobs/q8nmCpd3cXi96NdvSHODarSLDah_fHmC1nHrNzwau8c",
+    yaaa: "https://aggregator.walrus-testnet.walrus.space/v1/blobs/Ubf-crRS2_Z-gymuI-q4Q5W6GrK5-IWeRvhigj18icQ",
+    letItBe: "https://aggregator.walrus-testnet.walrus.space/v1/blobs/_oWKidmo2VKA_iIn1l63jwbtJQyZg_OQKWQp3r9er3o",
+  }
+
   // Feed items - mix of music, drops, and live events
   const allFeedItems = [
     {
@@ -152,15 +159,16 @@ export default function HomePage() {
     {
       id: 2,
       type: "drop",
-      title: "Midnight Echoes NFT",
-      artist: "Luna Waves",
-      image: "/placeholder.svg?height=800&width=400&text=Midnight+Echoes",
+      title: "Teamm Calor",
+      artist: "Emerging Artist",
+      image: walrusVideos.teamm,
+      videoUrl: walrusVideos.teamm,
       timeLeft: "2h 15m",
       price: "0.05 WLD",
       verified: true,
       rarity: "Rare",
       listeners: 1203,
-      description: "Exclusive drop with special benefits 🎵 Limited edition only 100 pieces! #NFTDrop #Exclusive",
+      description: "Toda la vida con este calor 🔥 Exclusive drop from Walrus storage! #NuevaMusica #NuevoArtista",
       benefits: ["VIP Access", "High Quality Download", "Exclusive Chat"],
       category: "drops",
       humanVerified: true,
@@ -168,13 +176,14 @@ export default function HomePage() {
     {
       id: 3,
       type: "live",
-      title: "Acoustic Sessions Vol. 3",
-      artist: "River Stone",
-      image: "/placeholder.svg?height=800&width=400&text=Acoustic+Sessions",
+      title: "Let It Be - Live",
+      artist: "Music Travel Love",
+      image: walrusVideos.letItBe,
+      videoUrl: walrusVideos.letItBe,
       viewers: 234,
       verified: false,
       startedAt: "5 min ago",
-      description: "Live acoustic session from the studio 🎸 Taking requests in chat! #LiveMusic #Acoustic",
+      description: "Live from Al Wathba Fossil Dunes 🎸 @sheridanbrass1 & @elisaastridofficial #LiveMusic",
       features: ["Chat", "Tips"],
       category: "live",
       humanVerified: true,
@@ -182,15 +191,16 @@ export default function HomePage() {
     {
       id: 4,
       type: "music",
-      title: "Neon Nights",
-      artist: "Maya Chen",
-      image: "/placeholder.svg?height=800&width=400&text=Neon+Nights",
-      duration: "4:12",
+      title: "Me Faltas Tú",
+      artist: "Nueva Promesa",
+      image: walrusVideos.yaaa,
+      videoUrl: walrusVideos.yaaa,
+      duration: "2:12",
       plays: 8934,
       likes: 567,
       verified: true,
       price: "Free",
-      description: "Electronic vibes for the night owls 🌙 Perfect for late night drives #Electronic #NightVibes",
+      description: "Ya salió! Me faltas tú 💔 Stored forever on Walrus! #NuevaMusica #ArtistaEmergente",
       category: "music",
       humanVerified: true,
     },
@@ -438,9 +448,21 @@ export default function HomePage() {
                 paddingBottom: "100px",
               }}
             >
-              {/* Background Image */}
+              {/* Background Image/Video */}
               <div className="absolute inset-0">
-                <img src={item.image || "/placeholder.svg"} alt={item.title} className="w-full h-full object-cover" />
+                {(item as any).videoUrl ? (
+                  <video
+                    src={(item as any).videoUrl}
+                    className="w-full h-full object-cover"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    poster={item.image}
+                  />
+                ) : (
+                  <img src={item.image || "/placeholder.svg"} alt={item.title} className="w-full h-full object-cover" />
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-black/40"></div>
               </div>
 

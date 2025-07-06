@@ -43,3 +43,6 @@ next-env.d.ts
 # documentation submodules
 /docs/world-id-docs
 /docs/walrus
+
+# assets folder (large media files)
+/assets
