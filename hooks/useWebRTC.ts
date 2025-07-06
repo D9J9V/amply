@@ -14,6 +14,7 @@ export function useWebRTC({ partyId, userId, isHost, enabled = true }: UseWebRTC
   const [isConnecting, setIsConnecting] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
   
   const signalingRef = useRef<WebRTCSignaling | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -82,8 +83,10 @@ export function useWebRTC({ partyId, userId, isHost, enabled = true }: UseWebRTC
           try {
             await remoteVideoRef.current.play();
             console.log('[WebRTC Hook] Video playback started');
+            setAutoplayBlocked(false);
           } catch (err) {
             console.error('[WebRTC Hook] Video autoplay failed:', err);
+            setAutoplayBlocked(true);
             // Video will play when user interacts with the page
           }
         }
@@ -148,6 +151,19 @@ export function useWebRTC({ partyId, userId, isHost, enabled = true }: UseWebRTC
     };
   }, [localStream]);
 
+  // Manually start playback (for when autoplay is blocked)
+  const playVideo = useCallback(async () => {
+    if (remoteVideoRef.current && remoteStream) {
+      try {
+        await remoteVideoRef.current.play();
+        setAutoplayBlocked(false);
+        console.log('[WebRTC Hook] Video playback started manually');
+      } catch (err) {
+        console.error('[WebRTC Hook] Manual play failed:', err);
+      }
+    }
+  }, [remoteStream]);
+
   // Clean up
   const disconnect = useCallback(() => {
     if (localStream) {
@@ -163,6 +179,7 @@ export function useWebRTC({ partyId, userId, isHost, enabled = true }: UseWebRTC
     setRemoteStream(null);
     setIsConnected(false);
     setIsConnecting(false);
+    setAutoplayBlocked(false);
   }, [localStream]);
 
   // Initialize on mount
@@ -197,6 +214,7 @@ export function useWebRTC({ partyId, userId, isHost, enabled = true }: UseWebRTC
       // Ensure video plays
       remoteVideoRef.current.play().catch(err => {
         console.error('[WebRTC Hook] Video play failed in effect:', err);
+        setAutoplayBlocked(true);
       });
     }
   }, [remoteStream]);
@@ -207,11 +225,13 @@ export function useWebRTC({ partyId, userId, isHost, enabled = true }: UseWebRTC
     isConnecting,
     isConnected,
     error,
+    autoplayBlocked,
     videoRef,
     remoteVideoRef,
     toggleAudio,
     toggleVideo,
     getMediaStates,
+    playVideo,
     disconnect
   };
 }

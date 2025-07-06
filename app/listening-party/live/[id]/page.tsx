@@ -46,11 +46,13 @@ export default function LiveListeningParty() {
     isConnecting,
     isConnected,
     error: webrtcError,
+    autoplayBlocked,
     videoRef,
     remoteVideoRef,
     toggleAudio,
     toggleVideo,
-    getMediaStates
+    getMediaStates,
+    playVideo
   } = useWebRTC({
     partyId,
     userId: currentUser?.id || '',
@@ -358,12 +360,28 @@ export default function LiveListeningParty() {
               ) : (
                 <>
                   {remoteStream ? (
-                    <video
-                      ref={remoteVideoRef}
-                      autoPlay
-                      playsInline
-                      className="w-full h-full object-cover"
-                    />
+                    <div className="relative w-full h-full">
+                      <video
+                        ref={remoteVideoRef}
+                        autoPlay
+                        muted={false}
+                        playsInline
+                        className="w-full h-full object-cover"
+                      />
+                      {autoplayBlocked && (
+                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                          <button
+                            onClick={playVideo}
+                            className="bg-purple-600 hover:bg-purple-700 px-8 py-4 rounded-full font-semibold transition-all transform hover:scale-105 flex items-center gap-3"
+                          >
+                            <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M8 5v14l11-7z"/>
+                            </svg>
+                            Click to Start Watching
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   ) : (
                     <div className="flex items-center justify-center h-full">
                       <div className="text-center">
