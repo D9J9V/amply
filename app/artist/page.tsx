@@ -19,15 +19,16 @@ export default function ArtistPage() {
   useEffect(() => {
     if (!isArtistVerified) {
       setShowVerificationPrompt(true)
+    } else {
+      setShowVerificationPrompt(false)
     }
   }, [isArtistVerified])
 
-  const handleArtistVerification = async () => {
+  const handleArtistVerification = () => {
     try {
-      const result = await verifyArtist('artist-dashboard-access')
-      if (result?.status === 'success') {
-        setShowVerificationPrompt(false)
-      }
+      verifyArtist('artist-dashboard-access')
+      // The verification result will be handled by the context
+      // which will update isArtistVerified automatically
     } catch (error) {
       console.error('Artist verification error:', error)
     }

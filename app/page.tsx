@@ -183,18 +183,14 @@ export default function HomePage() {
     }
   }
 
-  const handleWorldIdConnect = async () => {
+  const handleWorldIdConnect = () => {
     localStorage.setItem("amply-onboarding-seen", "true")
     setShowOnboarding(false)
     
     // Perform World ID verification
-    const result = await verifyHuman('home-page-access')
-    
-    if (result && result.status === 'success') {
-      console.log("World ID verification successful!")
-    } else {
-      console.error("World ID verification failed")
-    }
+    verifyHuman('home-page-access')
+    // The verification result will be handled by the context
+    console.log("World ID verification initiated")
   }
 
   const handleWorldIdSkip = () => {
